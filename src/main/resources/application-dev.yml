@@ -7,6 +7,6 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   flyway:
-    schemas: imperium
-    default-schema: imperium
+    schemas: cruzorder
+    default-schema: cruzorder
 

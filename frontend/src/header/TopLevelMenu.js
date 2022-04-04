@@ -9,7 +9,7 @@ const TopLevelMenu = ({loggedInPlayer}) => {
 
     let baseUrl = (window.location.protocol + '//' + window.location.host).replace('3000', '8080');
     const encodedBaseUrl = encodeURIComponent(baseUrl);
-    const discordLoginUrl = 'https://discord.com/api/oauth2/authorize?client_id=873320729351958539&redirect_uri='+
+    const discordLoginUrl = 'https://discord.com/api/oauth2/authorize?client_id=959108577954508860&redirect_uri='+
         encodedBaseUrl+'%2Fapi%2Flogin%2Fdiscord&response_type=code&scope=identify&state='+randomString;
 
     return (
@@ -17,7 +17,7 @@ const TopLevelMenu = ({loggedInPlayer}) => {
             <Menu.Item>
                 <Link to='/'>
                 {/*<Image size='mini' src='/logo.png' style={{ marginRight: '1.5em' }} />*/}
-                Civ Blitz
+                Cruzorder Kings
                 </Link>
             </Menu.Item>
 
@@ -30,17 +30,10 @@ const TopLevelMenu = ({loggedInPlayer}) => {
             }
             {loggedInPlayer &&
                 <Menu.Item header>
-                    <Link to='/collection'>
-                        {loggedInPlayer.discordUsername}'s Collection
+                    <Link to='/designer'>
+                        Character Designer
                     </Link>
                 </Menu.Item>
-            }
-            {loggedInPlayer &&
-            <Menu.Item header>
-                <Link to='/matches'>
-                    Matches
-                </Link>
-            </Menu.Item>
             }
 
             <Menu.Item header>
@@ -48,20 +41,6 @@ const TopLevelMenu = ({loggedInPlayer}) => {
                     Leaderboard
                 </Link>
             </Menu.Item>
-
-            <Menu.Item header>
-                <Link to='/modtester'>
-                Mod Tester
-                </Link>
-            </Menu.Item>
-
-            {loggedInPlayer &&
-            <Menu.Item header>
-                <Link to='/dlc-settings'>
-                    {loggedInPlayer.discordUsername}'s DLC Settings
-                </Link>
-            </Menu.Item>
-            }
 
             {loggedInPlayer && loggedInPlayer.isAdmin &&
             <Menu.Item header>

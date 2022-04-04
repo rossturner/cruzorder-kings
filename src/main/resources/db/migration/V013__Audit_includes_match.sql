@@ -1,1 +1,0 @@
-alter table audit_log add column match_id integer;

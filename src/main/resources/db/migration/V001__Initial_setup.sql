@@ -5,35 +5,17 @@ create table player (
     total_points_earned double precision,
     ranking_score       double precision
 );
+alter table player add column is_admin boolean default false;
+update player set is_admin = true where player_id = '291857466491273218'; -- Zsinj player ID
+update player set is_admin = true where player_id = '149222835850706944'; -- Harringzord player ID
 
-create table collection (
-    player_id          varchar(30),
-    card_trait_type     varchar(60),
-    quantity            integer,
-    primary key (player_id, card_trait_type)
+alter table player add column discord_avatar varchar(100);
+
+
+create table audit_log (
+   player_id          varchar(30),
+   discord_username    varchar(30),
+   datetime            timestamp,
+   action              varchar(300),
+   primary key (player_id, datetime)
 );
-
-create table match (
-    match_id            SERIAL PRIMARY KEY,
-    match_name          varchar(200),
-    timeslot            varchar(100),
-    match_state         varchar(30)
-);
-
-create table match_signup (
-   match_id                     integer,
-   player_id                    varchar(30),
-   card_civ_ability             varchar(60),
-   card_leader_ability          varchar(60),
-   card_unique_infrastruture    varchar(60),
-   card_unique_unit             varchar(60),
-   start_bias_civ_type          varchar(60),
-   committed                    boolean,
-   card_booster_claimed         boolean,
-   awarded_score                double precision,
-   primary key (match_id, player_id)
-);
-
-
-
--- CREATE INDEX idx_contract_symbol on contract (symbol);
