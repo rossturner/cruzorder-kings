@@ -3,10 +3,8 @@ package technology.rocketjump.cruzorder.model;
 import org.h2.command.dml.Call;
 
 import javax.persistence.criteria.CriteriaBuilder;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static technology.rocketjump.cruzorder.model.Skill.*;
 import static technology.rocketjump.cruzorder.model.TraitType.*;
@@ -95,7 +93,7 @@ public enum Trait {
 			new SkillModifier(Diplomacy, 2)
 	), List.of(
 			"+5% Monthly Income", "+10% Monthly Income per Stress level", "Stress loss through Extra Taxes", "Stress gain through Gifting",
-					"Stress gain through Granting Vassal", "Stress gain through Granting Title, if under Domain Limit"
+			"Stress gain through Granting Vassal", "Stress gain through Granting Title, if under Domain Limit"
 	), 30),
 	Gregarious(Personality, "gregarious", List.of(
 			new SkillModifier(Diplomacy, 2)
@@ -239,11 +237,312 @@ public enum Trait {
 			"+10 Same trait opinion", "−5 Attraction opinion"
 	), -5),
 	Stuttering(Congenital, "stuttering", List.of(new SkillModifier(Diplomacy, -2)), List.of("+10 Same trait opinion"), -5),
+	Pure_Blooded(Congenital, "pure_blooded", List.of(), List.of(
+			"+10% Fertility", "−50% Inbreeding chance", "+0.25 Health"
+	), 50),
+	Giant(Congenital, "giant", List.of(
+			new SkillModifier(Prowess, 6)
+	), List.of(
+			"+5 Vassal opinion", "+10 Tribal Ruler Opinion", "+20 Same trait opinion", "−5 Attraction opinion", "−0.25 Health"
+	), 20),
+	Scaly(Congenital, "scaly", List.of(),
+			"""
+					+10 Natural Dread
+					 +10 Same trait opinion
+					 −10 Vassal opinion
+					 −30 Attraction opinion
+					 −20% Fertility
+					"""
+			, 0),
+	Club_footed(Congenital, "clubfooted", List.of(new SkillModifier(Prowess, -2)), """
+			+10 Same trait opinion
+			 −10 Attraction opinion
+			""", 0),
+	Dwarf(Congenital, "dwarf", List.of(new SkillModifier(Prowess, -4)), """
+			+20 Same trait opinion
+			 −20 Attraction opinion
+			""", 0),
+	Hunchbacked(Congenital, "hunchbacked", List.of(new SkillModifier(Prowess, -2)), """
+			+10 Same trait opinion
+			 −30 Attraction opinion
+			 −10 Vassal opinion
+			""", -10),
+	Sterile(Congenital, "infertile", List.of(), """
+			−50% Fertility
+			""", 0),
+	Wheezing(Congenital, "wheezing", List.of(), """
+			−10 Vassal opinion
+			 −0.15 Health
+			""", -10),
+	Spindly(Congenital, "spindly", List.of(new SkillModifier(Prowess, -1)), """
+			−10 Attraction opinion
+			 −0.25 Health
+			""", -10),
+	Bleeder(Congenital, "bleeder", List.of(), """
+			−10 Vassal opinion
+			 -1.5 Health
+			""", -20),
+	Beautiful(Congenital, "beauty_good_3", List.of(new SkillModifier(Diplomacy, 3)), """
+			 +30 Attraction opinion
+			 +30% Fertility
+			 Slower Portrait Aging
+			""", 120),
+	Handsome(Congenital, "beauty_good_2", List.of(new SkillModifier(Diplomacy, 2)), """
+			+20 Attraction opinion
+			 +20% Fertility
+			 Slower Portrait Aging
+			""", 80),
+	Comely(Congenital, "beauty_good_1", List.of(new SkillModifier(Diplomacy, 1)), """
+			+10 Attraction opinion
+			 +10% Fertility
+			 Slower Portrait Aging
+			""", 40),
+	Homely(Congenital, "beauty_bad_1", List.of(new SkillModifier(Diplomacy, -1)), """
+			 −10 Attraction opinion
+			−10% Fertility
+			""", -10),
+	Ugly(Congenital, "beauty_bad_2", List.of(new SkillModifier(Diplomacy, -2)), """
+			−20 Attraction opinion
+			 −20% Fertility
+			""", -20),
+	Hideous(Congenital, "beauty_bad_3", List.of(new SkillModifier(Diplomacy, -3)), """
+				−30 Attraction opinion
+				−30% Fertility
+			""", -30),
+	Genius(Congenital, "intellect_good_3", List.of(
+			new SkillModifier(Diplomacy, 5),
+			new SkillModifier(Martial, 5),
+			new SkillModifier(Stewardship, 5),
+			new SkillModifier(Intrigue, 5),
+			new SkillModifier(Learning, 5)
+	), """
+			 +30% Monthly Lifestyle Experience
+			""", 240),
+	Intelligent(Congenital, "intellect_good_2", List.of(
+			new SkillModifier(Diplomacy, 3),
+			new SkillModifier(Martial, 3),
+			new SkillModifier(Stewardship, 3),
+			new SkillModifier(Intrigue, 3),
+			new SkillModifier(Learning, 3)
+	), """
+			 +20% Monthly Lifestyle Experience
+			""", 160),
+	Quick(Congenital, "intellect_good_1", List.of(
+			new SkillModifier(Diplomacy, 1),
+			new SkillModifier(Martial, 1),
+			new SkillModifier(Stewardship, 1),
+			new SkillModifier(Intrigue, 1),
+			new SkillModifier(Learning, 1)
+	), """
+			 +10% Monthly Lifestyle Experience
+			""", 80),
+	Slow(Congenital, "intellect_bad_1", List.of(
+			new SkillModifier(Diplomacy, -2),
+			new SkillModifier(Martial, -2),
+			new SkillModifier(Stewardship, -2),
+			new SkillModifier(Intrigue, -2),
+			new SkillModifier(Learning, -2)
+	), """
+			 -10% Monthly Lifestyle Experience
+			""", -15),
+	Stupid(Congenital, "intellect_bad_2", List.of(
+			new SkillModifier(Diplomacy, -4),
+			new SkillModifier(Martial, -4),
+			new SkillModifier(Stewardship, -4),
+			new SkillModifier(Intrigue, -4),
+			new SkillModifier(Learning, -4)
+	), """
+			 -20% Monthly Lifestyle Experience
+			""", -30),
+	Imbecile(Congenital, "intellect_bad_3", List.of(
+			new SkillModifier(Diplomacy, -6),
+			new SkillModifier(Martial, -6),
+			new SkillModifier(Stewardship, -6),
+			new SkillModifier(Intrigue, -6),
+			new SkillModifier(Learning, -6)
+	), """
+			 -30% Monthly Lifestyle Experience
+			""", -45),
+	Herculean(Congenital, "physique_good_3", List.of(new SkillModifier(Prowess, 8)), """
+			 +15 Attraction opinion
+			  +1 Health
+			""", 180),
+	Robust(Congenital, "physique_good_2", List.of(new SkillModifier(Prowess, 4)), """
+			 +10 Attraction opinion
+			  +0.5 Health
+			""", 120),
+	Hale(Congenital, "physique_good_1", List.of(new SkillModifier(Prowess, 2)), """
+			 +5 Attraction opinion
+			  +0.25 Health
+			""", 60),
+	Delicate(Congenital, "physique_bad_1", List.of(new SkillModifier(Prowess, -2)), """
+			  -0.25 Health
+			""", -15),
+	Frail(Congenital, "physique_bad_2", List.of(new SkillModifier(Prowess, -4)), """
+			 -5 Attraction opinion
+			  -0.5 Health
+			""", -30),
+	Feeble(Congenital, "physique_bad_3", List.of(new SkillModifier(Prowess, -6)), """
+			 -10 Attraction opinion
+			  -1 Health
+			""", -45),
 
+	// Physical
+	Shrewd(Physical, "shrewd", List.of(
+			new SkillModifier(Diplomacy, 2),
+			new SkillModifier(Martial, 2),
+			new SkillModifier(Stewardship, 2),
+			new SkillModifier(Intrigue, 2),
+			new SkillModifier(Learning, 2)
+	), """
+			""", 50),
+	Strong(Physical, "strong", List.of(new SkillModifier(Prowess, 4)), """
+						+0.5 Health
+			""", 50),
+	Scarred(Physical, "scarred", List.of(), """
+			+0.1 Monthly prestige
+			 +5 Attraction opinion
+			""", 10),
+	One_Eyed(Physical, "one_eyed", List.of(
+			new SkillModifier(Learning, 1), new SkillModifier(Prowess, -2)
+	), """
+				+10 Natural Dread
+			    −5 Attraction opinion
+			    +100% Likelihood of capture or death in Battle
+			""", 10),
+	One_Legged(Physical, "one_legged", List.of(
+			new SkillModifier(Learning, 1), new SkillModifier(Prowess, -4)
+	), """
+				-10 Natural Dread
+			    −10 Attraction opinion
+			    +100% Likelihood of capture or death in Battle
+			""", -5),
+	Disfigured(Physical, "disfigured", List.of(new SkillModifier(Diplomacy, -4)), """
+			−20% Fertility
+			 −20 Attraction opinion
+			 +100% Likelihood of capture or death in Battle
+			""", -10),
+	Weak(Physical, "weak", List.of(new SkillModifier(Prowess, -4)), """
+			−10 Attraction opinion
+			 −10 Vassal opinion
+			 −0.5 Health
+			""", -10),
+	Dull(Physical, "dull", List.of(
+			new SkillModifier(Diplomacy, -2),
+			new SkillModifier(Martial, -2),
+			new SkillModifier(Stewardship, -2),
+			new SkillModifier(Intrigue, -2),
+			new SkillModifier(Learning, -2)
+	), """
+			""", -20),
+	Eunuch(Physical, "eunuch", List.of(), """
+			−20 Attraction opinion
+			 Can not have children
+			 Can not inherit titles
+			 May not marry
+			""", 7777),
 
-	Example(Congenital, "example", List.of(), List.of(), 7777),
-	// Physical,
 	// 	Lifestyle,
+	August(Lifestyle, "august", List.of(
+			new SkillModifier(Diplomacy, 2), new SkillModifier(Martial, 1)
+	), """
+						+1 Monthly Prestige
+			""", 50),
+	Diplomat(Lifestyle, "diplomat", List.of(new SkillModifier(Diplomacy, 3)), """
+			+20 Independent Ruler Opinion
+			 +25% Personal Scheme Power
+			""", 50),
+	Patriarch(Lifestyle, "family_first", List.of(), """
+			+10 House Opinion
+			 +15 Close Family Opinion
+			 +20% Fertility
+			 +20% Stress loss
+			""", 50),
+	Gallant(Lifestyle, "gallant", List.of(
+			new SkillModifier(Martial, 2), new SkillModifier(Prowess, 4)
+	), """
+			+20% Monthly prestige
+			 +20 Attraction opinion
+			""", 7777),
+	Overseer(Lifestyle, "overseer", List.of(
+			new SkillModifier(Martial, 2), new SkillModifier(Stewardship, 2)
+	), """
+						+50% Monthly Control Growth
+			""", 50),
+	Strategist(Lifestyle, "strategist", List.of(
+			new SkillModifier(Diplomacy, 1), new SkillModifier(Martial, 3)
+	), """
+			+25% Enemy Fatal Casualties
+			 Crosses Rivers & Straits without Advantage loss
+			""", 7777),
+	Administrator(Lifestyle, "administrator", List.of(
+			new SkillModifier(Diplomacy, 1), new SkillModifier(Stewardship, 3)
+	), """
+						+5 Vassal opinion
+			""", 50),
+	Architect(Lifestyle, "architect", List.of(new SkillModifier(Stewardship, 2)), """
+			−15% Building and Holding Construction Time
+			 −10% Building and Holding Gold Cost
+			""", 50),
+	Avaricious(Lifestyle, "avaricious", List.of(new SkillModifier(Stewardship, 2)), """
+						+15% Holding Taxes
+			""", 50),
+	Schemer(Lifestyle, "schemer", List.of(new SkillModifier(Intrigue, 5)), """
+						+25% Hostile Scheme Power
+			""", 50),
+	Seducer(Lifestyle, "seducer", List.of(new SkillModifier(Intrigue, 3)), """
+				+20% Fertility
+			    +40 Attraction opinion
+			""", 50),
+	Torturer(Lifestyle, "torturer", List.of(new SkillModifier(Prowess, 4)), """
+			+50% Dread gain
+			 +25% Hostile Scheme Resistance
+			 +10% Levy Size
+			""", 50),
+	Scholar(Lifestyle, "scholar", List.of(new SkillModifier(Learning, 5)), """
+				+15% Monthly Development Growth
+			    +10 Hostile Scheme Success chance
+			    +10 Personal Scheme Success chance
+			""", 50),
+	Theologian(Lifestyle, "theologian", List.of(new SkillModifier(Learning, 3)), """
+						+20% Monthly piety
+			""", 50),
+	Whole_of_Body(Lifestyle, "whole_of_body", List.of(), """
+			+25% Fertility
+			 −25% Stress gain
+			 +0.5 Health
+			""", 75),
+	Herbalist(Lifestyle, "herbalist", List.of(
+			new SkillModifier(Learning, 2), new SkillModifier(Intrigue, 2)
+	), """
+						+0.5 Disease Resistance Health Boost
+			""", 50),
+	Gardener(Lifestyle, "gardener", List.of(new SkillModifier(Stewardship, 2)), """
+				−20% Stress Gain
+			    +10 Courtier and Guest Opinion
+			""", 50),
+	Aspiring_Blademaster(Lifestyle, "blademaster_1", List.of(new SkillModifier(Prowess, 3)), """
+						+0.25 Disease Resistance Health Boost
+			""", 20),
+	Blademaster(Lifestyle, "blademaster_2", List.of(new SkillModifier(Prowess, 6)), """
+						+0.5 Disease Resistance Health Boost
+			""", 40),
+	Legendary_Blademaster(Lifestyle, "blademaster_3", List.of(new SkillModifier(Prowess, 12)), """
+						+1 Disease Resistance Health Boost
+			""", 60),
+
+	Novice_Hunter(Lifestyle, "hunter_1", List.of(new SkillModifier(Prowess, 2)), """
+					+10% Stress loss
+			""", 20),
+	Hunter(Lifestyle, "hunter_2", List.of(new SkillModifier(Prowess, 4)), """
+				+15% Stress loss
+			""", 40),
+	Master_Hunter(Lifestyle, "hunter_3", List.of(new SkillModifier(Prowess, 6)), """
+				+20% Stress loss
+			""", 60),
+
+	Example(Lifestyle, "example", List.of(), """
+			""", 7777),
 	// 	Commander,
 	// 	Infamous,
 	// 	CopingMechanism,
@@ -282,6 +581,24 @@ public enum Trait {
 		Compassionate.addExclusiveWith(Callous);
 		Compassionate.addExclusiveWith(Sadistic);
 		Callous.addExclusiveWith(Sadistic);
+
+		allExclusiveWithEachOther(List.of(Beautiful, Handsome, Comely, Homely, Ugly, Hideous));
+		allExclusiveWithEachOther(List.of(Genius, Intelligent, Quick, Slow, Stupid, Imbecile));
+		allExclusiveWithEachOther(List.of(Herculean, Robust, Hale, Delicate, Frail, Feeble));
+
+		Strong.addExclusiveWith(Weak);
+		Shrewd.addExclusiveWith(Dull);
+
+		allExclusiveWithEachOther(List.of(Aspiring_Blademaster, Blademaster, Legendary_Blademaster));
+		allExclusiveWithEachOther(List.of(Novice_Hunter, Hunter, Master_Hunter));
+	}
+
+	private static void allExclusiveWithEachOther(List<Trait> traits) {
+		for (int primaryCursor = 0; primaryCursor < traits.size() - 1; primaryCursor++) {
+			for (int secondaryCursor = primaryCursor + 1; secondaryCursor < traits.size(); secondaryCursor++) {
+				traits.get(primaryCursor).addExclusiveWith(traits.get(secondaryCursor));
+			}
+		}
 	}
 
 	Trait(TraitType type, String internalName, List<SkillModifier> skillModifiers, List<String> otherModifiers, int cost) {
@@ -289,6 +606,17 @@ public enum Trait {
 		this.internalName = internalName;
 		this.skillModifiers = skillModifiers;
 		this.otherModifiers = otherModifiers;
+		this.cost = cost;
+	}
+
+	Trait(TraitType type, String internalName, List<SkillModifier> skillModifiers, String otherModifierLines, int cost) {
+		this.type = type;
+		this.internalName = internalName;
+		this.skillModifiers = skillModifiers;
+		this.otherModifiers = Arrays.stream(otherModifierLines.split("\n"))
+				.map(String::trim)
+				.filter(s -> !s.isEmpty())
+				.collect(Collectors.toList());
 		this.cost = cost;
 	}
 

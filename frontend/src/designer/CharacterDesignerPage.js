@@ -78,7 +78,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
 
                         <Input label='Dynasty name' value={dynastyName}
                                onChange={(event, data) => setDynastyName(data.value)} fluid
-                               placeholder='The name of your dynasty'/>
+                               placeholder='The name of your dynasty (family name)'/>
 
                         <Input label='Dynasty motto' value={dynastyMotto}
                                onChange={(event, data) => setDynastyMotto(data.value)} fluid
