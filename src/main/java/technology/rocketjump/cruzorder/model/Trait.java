@@ -1,6 +1,7 @@
 package technology.rocketjump.cruzorder.model;
 
 import org.h2.command.dml.Call;
+import org.springframework.data.repository.cdi.Eager;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import java.util.*;
@@ -540,19 +541,298 @@ public enum Trait {
 	Master_Hunter(Lifestyle, "hunter_3", List.of(new SkillModifier(Prowess, 6)), """
 				+20% Stress loss
 			""", 60),
+	Wise_Man(Lifestyle, "mystic_1", List.of(new SkillModifier(Learning, 1)), """
+			""", 20),
+	Mystic(Lifestyle, "mystic_2", List.of(new SkillModifier(Learning, 2)), """
+			""", 40),
+	Miracle_Worker(Lifestyle, "mystic_3", List.of(new SkillModifier(Learning, 4)), """
+			""", 60),
+	Eager_Reveler(Lifestyle, "reveler_1", List.of(new SkillModifier(Diplomacy, 2), new SkillModifier(Intrigue, 1)), """
+						+10 Same trait opinion
+			""", 25),
+	Famous_Reveler(Lifestyle, "reveler_2", List.of(new SkillModifier(Diplomacy, 3), new SkillModifier(Intrigue, 2)), """
+						+15 Same trait opinion
+			""", 25),
+	Legendary_Reveler(Lifestyle, "reveler_3", List.of(new SkillModifier(Diplomacy, 4), new SkillModifier(Intrigue, 3)), """
+						+20 Same trait opinion
+			""", 25),
+	Novice_Physician(Lifestyle, "physician_1", List.of(new SkillModifier(Learning, 1)), """
+						+0.25 Disease Resistance Health Boost
+			""", 20),
+	Physician(Lifestyle, "physician_2", List.of(new SkillModifier(Learning, 2)), """
+						+0.5 Disease Resistance Health Boost
+			""", 40),
+	Renowned_Physician(Lifestyle, "physician_3", List.of(new SkillModifier(Learning, 4)), """
+						+1 Disease Resistance Health Boost
+			""", 60),
 
-	Example(Lifestyle, "example", List.of(), """
-			""", 7777),
 	// 	Commander,
-	// 	Infamous,
-	// 	CopingMechanism,
-	// 	Health, SKIP
-	// 	Disease, SKIP
-	// 	Dynasty,
-	// 	Descendant,
-	// 	Decision,
-	// 	Event
+	Aggressive_Attacker(Commander, "aggressive_attacker", List.of(), """
+							+25% Enemy Fatal Casualties
+			""", 25),
+	Flexible_leader(Commander, "flexible_leader", List.of(), """
+							−50% Enemy Defensive Advantage
+			""", 25),
+	Forder(Commander, "forder", List.of(), """
+					Crosses Rivers & Straits without Advantage penalties
+			""", 25),
+	Holy_Warrior(Commander, "holy_warrior", List.of(), """
+			+10 Faith Hostility Advantage
+			""", 25),
+	Logistician(Commander, "logistician", List.of(), """
+							+100% Supply Duration
+			""", 25),
+	Military_Engineer(Commander, "military_engineer", List.of(), """
+			−30% Siege Phase Time
+			""", 25),
+	Organizer(Commander, "organizer", List.of(), """
+			+25% Movement Speed
+			 −20% Retreat Losses
+			""", 25),
+	Reaver(Commander, "reaver", List.of(), """
+			+100% Raid Speed
+			Death natural.png −75% Hostile County Attrition
+			""", 25),
+	Unyielding_Defender(Commander, "unyielding_defender", List.of(), """
+						−25% Friendly Fatal Casualties
+			""", 25),
+	Cautious_Leader(Commander, "cautious_leader", List.of(), """
+			+4 Minimum Battle Roll
+			 −2 Maximum Battle Roll
+			""", 25),
+	Reckless(Commander, "reckless", List.of(), """
+			+6 Maximum Battle Roll
+			 −4 Minimum Battle Roll
+			""", 25),
+	Forest_Fighter(Commander, "forest_fighter", List.of(), """
+						+5 Advantage in Forest and Taiga terrain
+			""", 25),
+	Open_Terrain_Expert(Commander, "open_terrain_expert", List.of(), """
+			+4 Advantage in Farmlands, Plains and Steppe terrain
+			""", 25),
+	Rough_Terrain_Expert(Commander, "rough_terrain_expert", List.of(), """
+							+4 Advantage in Hills, Mountains and Wetlands terrain
+			""", 25),
+	Desert_Warrior(Commander, "desert_warrior", List.of(), """
+			+5 Advantage in Desert, Desert Mountains, Drylands and Oasis terrain
+			 No Desert Supply Limit Penalty
+			""", 25),
+	Jungle_Stalker(Commander, "jungle_stalker", List.of(), """
+			+6 Jungle Advantage
+			Death natural.png −50% Jungle Attrition
+			 No Jungle Supply Limit Penalty
+			""", 25),
+	Winter_Soldier(Commander, "winter_soldier", List.of(), """
+			+25% Movement Speed in Baronies affected by Winter
+			 +4 Advantage in in Baronies affected by Winter
+			""", 25),
 
+	// 	Infamous,
+	Adulterer(Infamous, "adulterer", List.of(), """
+							+10 Same trait opinion
+			""", -5),
+	Fornicator(Infamous, "fornicator", List.of(), """
+			+10 Same trait opinion
+			""", -5),
+	Deviant(Infamous, "deviant", List.of(), """
+			+25% Stress loss
+			 +35 Same trait opinion
+			""", -5),
+	Incestuous(Infamous, "incestuous", List.of(), """
+							+20 Same trait opinion
+			""", 0),
+	Witch(Infamous, "witch", List.of(
+			new SkillModifier(Intrigue, 1), new SkillModifier(Learning, 1), new SkillModifier(Diplomacy, -1)
+	), """
+			+20 Same trait opinion
+			""", 10),
+	Cannibal(Infamous, "cannibal", List.of(new SkillModifier(Prowess, 2)), """
+			+15% Stress loss
+			 +20 Natural Dread
+			 +35 Same trait opinion
+			""", 40),
+	Murderer(Infamous, "murderer", List.of(), """
+							−15 General opinion
+			""", -10),
+
+
+	// 	CopingMechanism,
+	Drunkard(CopingMechanism, "drunkard", List.of(
+			new SkillModifier(Stewardship, -2), new SkillModifier(Prowess, 2)
+	), """
+			+20% Stress loss
+			 +10 Same trait opinion
+			 −0.15 Health
+			""", -10),
+	Flagellant(CopingMechanism, "flagellant", List.of(new SkillModifier(Prowess, -2)), """
+			+20% Stress loss
+			 −0.15 Health
+			""", -10),
+	Comfort_Eater(CopingMechanism, "comfort_eater", List.of(new SkillModifier(Stewardship, -1)), """
+							+20% Stress loss
+			""", -5),
+	Contrite(CopingMechanism, "contrite", List.of(new SkillModifier(Intrigue, -2)), """
+			+20% Stress loss
+			""", -5),
+	Improvident(CopingMechanism, "improvident", List.of(new SkillModifier(Diplomacy, 1)), """
+			+20% Stress loss
+			 −15% Monthly income
+			""", -5),
+	Inappetetic(CopingMechanism, "inappetetic", List.of(
+			new SkillModifier(Diplomacy, -1), new SkillModifier(Prowess, -3)
+	), """
+			+20% Stress loss
+			""", -5),
+	Reclusive(CopingMechanism, "reclusive", List.of(
+			new SkillModifier(Diplomacy, -2), new SkillModifier(Stewardship, -1)
+	), """
+			+20% Stress loss
+			""", -5),
+	Irritable(CopingMechanism, "irritable", List.of(
+			new SkillModifier(Diplomacy, -2), new SkillModifier(Martial, -1), new SkillModifier(Prowess, 2)
+	), """
+			+20% Stress loss
+			 +10% Dread gain
+			 −5 Attraction opinion
+			Enables the Release you Anger interaction
+			""", 0),
+	Rakish(CopingMechanism, "rakish", List.of(
+			new SkillModifier(Intrigue, 1), new SkillModifier(Diplomacy, -1)
+	), """
+			+20% Stress loss
+			 +5 Same trait opinion
+			 −5 Attraction opinion
+			""", 0),
+	Hashishiyah(CopingMechanism, "hashishiyah", List.of(
+			new SkillModifier(Stewardship, -2), new SkillModifier(Learning, -2)
+	), """
+			+20% Stress loss
+			 +10 Same trait opinion
+			""", 5),
+	Profligate(CopingMechanism, "profligate", List.of(), """
+			+20% Stress loss
+			 +0.5 Monthly prestige
+			 −10% Monthly income
+			""", 10),
+	Confider(CopingMechanism, "confider", List.of(new SkillModifier(Diplomacy, 1)), """
+			+20% Stress loss
+			""", 15),
+	Journaller(CopingMechanism, "journaller", List.of(new SkillModifier(Learning, 1)), """
+			+20% Stress loss
+			""", 15),
+	Athletic(CopingMechanism, "athletic", List.of(new SkillModifier(Prowess, 1)), """
+			+20% Stress loss
+			 +0.25 Health
+			""", 40),
+
+	// 	Dynasty,
+	Bastard(Dynasty, "bastard", List.of(new SkillModifier(Diplomacy, -1)), """
+			+5 Same trait opinion
+			 −15 Dynasty Opinion
+			 Can not inherit titles
+			""", 0),
+	Born_in_the_Purple(Dynasty, "born_in_the_purple", List.of(), """
+			+0.1 Monthly prestige
+			 −25% Short Reign Duration
+			""", 40),
+	Legitimized_Bastard(Dynasty, "legitimized_bastard", List.of(new SkillModifier(Diplomacy, -1)), """
+							−10 Dynasty Opinion
+			""", 0),
+	Wild_Oat(Dynasty, "wild_oat", List.of(new SkillModifier(Diplomacy, -1)), """
+			""", 0),
+
+	// 	Descendant,
+	Sayyid(Descendant, "sayyid", List.of(), """
+						+5 Same faith opinion
+			""", 25),
+
+	// 	Decision,
+	Pilgrim(Decision, "pilgrim", List.of(), """
+			+10% Monthly piety
+			 +5 Same faith opinion
+			""", 30),
+	Hajji(Decision, "hajjaj", List.of(), """
+			+10% Monthly piety
+			 +5 Same faith opinion
+			""", 30),
+
+	// 	Event
+	Adventurer(Event, "adventurer", List.of(), """
+			+1 Martial per Level of Fame
+			 +1 Prowess per Level of Fame
+			 -50% Men-At-Arms Maintenance
+			 +20 Same trait opinion
+			 -10 General Opinion
+			 No different Culture Opinion penalty
+			""", 50),
+	Berserker(Event, "berserker", List.of(
+			new SkillModifier(Martial, 2), new SkillModifier(Prowess, 5), new SkillModifier(Diplomacy, -2)
+	), """
+			+10 Same trait opinion
+			""", 40),
+	Heresiarch(Event, "heresiarch", List.of(
+			new SkillModifier(Martial, 2), new SkillModifier(Learning, 2), new SkillModifier(Prowess, 2)
+	), """
+			+5 Advantage against co-religionists
+			 +10 Same faith opinion
+			""", 50),
+	Crusader_King(Event, "crusader_king", List.of(
+			new SkillModifier(Martial, 3), new SkillModifier(Prowess, 2)
+	), """
+			 +5 Faith Hostility Advantage
+			 −20% Retreat Losses
+			 -15% Friendly Fatal Casualties
+			 +50% Monthly Control
+			 +35 Popular opinion
+			 +15 Same faith opinion
+			 +10 Same trait opinion
+			Ignore Negative Culture Opinion
+			""", 120),
+	Peasant_Leader(Event, "peasant_leader", List.of(), """
+			-50% Army Gold Maintenance
+			 +10 Popular opinion
+			 +25 Same trait opinion
+			 −10 General opinion
+			""", 100),
+	Poet(Event, "poet", List.of(), """
+			+1 Diplomacy per Level of Fame
+			 +10% Stress Loss
+			Enables the Send Poem character interaction
+			""", 40),
+	Raider(Event, "viking", List.of(
+			new SkillModifier(Martial, 2), new SkillModifier(Prowess, 3)
+	), """
+			+0.3 Monthly prestige
+			 +5 Same trait opinion
+			""", 25),
+	Shieldmaiden(Event, "shieldmaiden", List.of(
+			new SkillModifier(Martial, 3), new SkillModifier(Prowess, 3)
+	), """
+			+5 Same trait opinion
+			""", 40),
+	Varangian(Event, "varangian", List.of(
+			new SkillModifier(Diplomacy, 1), new SkillModifier(Martial, 2), new SkillModifier(Prowess, 2)
+	), """
+			 +10 Same trait opinion
+			""", 40),
+	Crusader(Event, "crusader", List.of(
+			new SkillModifier(Martial, 2), new SkillModifier(Prowess, 3)
+	), """
+			+15 Clergy opinion
+			 +5 Same faith opinion
+			""", 50),
+	Mujahid(Event, "mujahid", List.of(
+			new SkillModifier(Martial, 2), new SkillModifier(Prowess, 3)
+	), """
+			+15 Clergy opinion
+			 +5 Same faith opinion
+			""", 50),
+	Warrior_of_the_Faith(Event, "faith_warrior", List.of(
+			new SkillModifier(Martial, 2), new SkillModifier(Prowess, 3)
+	), """
+			+15 Clergy opinion
+			 +5 Same faith opinion
+			""", 50),
 	;
 	public final TraitType type;
 	public final String internalName;
@@ -591,6 +871,9 @@ public enum Trait {
 
 		allExclusiveWithEachOther(List.of(Aspiring_Blademaster, Blademaster, Legendary_Blademaster));
 		allExclusiveWithEachOther(List.of(Novice_Hunter, Hunter, Master_Hunter));
+		allExclusiveWithEachOther(List.of(Wise_Man, Mystic, Miracle_Worker));
+		allExclusiveWithEachOther(List.of(Eager_Reveler, Famous_Reveler, Legendary_Reveler));
+		allExclusiveWithEachOther(List.of(Novice_Physician, Physician, Renowned_Physician));
 	}
 
 	private static void allExclusiveWithEachOther(List<Trait> traits) {

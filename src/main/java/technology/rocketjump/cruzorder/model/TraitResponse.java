@@ -7,6 +7,7 @@ public class TraitResponse {
 
 	public final String internalName;
 	public final String name;
+	public final String type;
 	public final Set<Trait> exclusiveWith;
 	public final List<SkillModifier> skillModifiers;
 	public final List<String> otherModifiers;
@@ -15,6 +16,7 @@ public class TraitResponse {
 	public TraitResponse(Trait trait) {
 		this.internalName = trait.internalName;
 		this.name = trait.name().replace("_", " ");
+		this.type = trait.type.name();
 		this.skillModifiers = trait.skillModifiers;
 		this.otherModifiers = trait.otherModifiers;
 		this.cost = trait.cost;
