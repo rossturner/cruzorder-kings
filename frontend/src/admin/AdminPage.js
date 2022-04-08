@@ -1,14 +1,13 @@
-import {Button, Container, Header, Input, Message, Segment, Table} from "semantic-ui-react";
+import {Container, Header, Segment, Table} from "semantic-ui-react";
 import React, {useEffect, useState} from "react";
 import axios from "axios";
-import {Link, useHistory} from "react-router-dom";
 import {DateTime} from "luxon";
 
 
 const AdminPage = () => {
 
     const [auditLogs, setAuditLogs] = useState([]);
-    let history = useHistory();
+    // let history = useHistory();
 
     useEffect(() => {
         axios.get('/api/admin/audit_logs')

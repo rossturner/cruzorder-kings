@@ -1,5 +1,5 @@
 import TraitStore from "./TraitStore";
-import React, {useEffect, useState} from "react";
+import React from "react";
 import {Image, List, Popup} from "semantic-ui-react";
 
 export const colorizePositiveToGreen = (amount) => {
@@ -22,9 +22,9 @@ export const buildTraitListItems = (trait) => {
         items.push(<List.Item key={modifier.skill}>{colorizePositiveToGreen(modifier.modifierAmount)} {modifier.skill}</List.Item>);
     });
     trait.otherModifiers.forEach(other => {
-        items.push(<List.Item>{other}</List.Item>);
+        items.push(<List.Item key={other}>{other}</List.Item>);
     });
-    items.push(<List.Item><strong>Cost: {colorizePositiveToRed(trait.cost)}</strong></List.Item>)
+    items.push(<List.Item key='cost'><strong>Cost: {colorizePositiveToRed(trait.cost)}</strong></List.Item>)
     return items;
 }
 

@@ -1,5 +1,3 @@
-import ImpRandom from "../ImpRandom";
-
 let allTraits = [];
 const byType = {};
 const byInternalName = {};

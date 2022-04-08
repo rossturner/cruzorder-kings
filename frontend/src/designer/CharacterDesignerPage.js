@@ -53,7 +53,6 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
     selectedTraits.forEach(selected => {
         excludedTraits = excludedTraits.concat(TraitStore.getByInternalName(selected).exclusiveWith);
     });
-    console.log('excludedTraits', excludedTraits);
     const availableTraits = TraitStore.getAll().filter(t => t.type !== 'Education')
         .filter(t => !selectedTraits.includes(t.internalName) && !excludedTraits.includes(t.internalName));
     const availableTraitsByType = {};
@@ -137,8 +136,11 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
         selectedTraits.forEach(t => {
             pointsSpent += TraitStore.getByInternalName(t).cost;
         });
+        Object.values(baseSkills).forEach(skillValue => {
+            pointsSpent += skillCostCalculator(skillValue);
+        });
         setDesignerPoints(pointsSpent);
-    }, [primaryCharacterAge, educationTraitName, selectedTraits]);
+    }, [primaryCharacterAge, educationTraitName, selectedTraits, baseSkills]);
 
     const triggerSave = () => {
         // TODO check syntax of coat of arms
@@ -157,8 +159,6 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
         cloned[skill] = cloned[skill] - 1;
         setBaseSkills(cloned);
     }
-
-    console.log('Martial', baseSkills['Martial'], skills['Martial'])
 
     const buildSkillControl = (skill) => {
         return <SkillControl skill={skill} baseValue={baseSkills[skill]} value={skills[skill]}
@@ -184,15 +184,15 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
 
                     <Form>
                         <Input label='Dynasty name prefix' value={dynastyNamePrefix}
-                               onChange={(event, data) => setDynastyNamePrefix(data.value)} fluid
+                               onChange={(event, data) => setDynastyNamePrefix(data.value)} fluid={true}
                                placeholder='(Optional) Use this to add a prefix to your dynasty name e.g. "von" or "de"'/>
 
                         <Input label='Dynasty name' value={dynastyName}
-                               onChange={(event, data) => setDynastyName(data.value)} fluid
+                               onChange={(event, data) => setDynastyName(data.value)} fluid={true}
                                placeholder='The name of your dynasty (family name)'/>
 
                         <Input label='Dynasty motto' value={dynastyMotto}
-                               onChange={(event, data) => setDynastyMotto(data.value)} fluid
+                               onChange={(event, data) => setDynastyMotto(data.value)} fluid={true}
                                placeholder='(Optional) Your dynasty motto'/>
 
                         <Form.Field label='Dynasty Coat of Arms (use Copy to Clipboard in CK3 CoA designer)'
@@ -204,7 +204,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
 
                         <Form.Field
                             control={Checkbox}
-                            value={copyCoa}
+                            checked={copyCoa}
                             onChange={(event, data) => setCopyCoa(data.value)}
                             label={{children: 'Check this box to copy your dynasty coat of arms to your primary title i.e. your county or duchy coat of arms'}}
                         />
@@ -213,7 +213,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                         <Header as='h3'>Primary Character</Header>
 
                         <Input label='Character name' value={primaryCharacterName}
-                               onChange={(event, data) => setPrimaryCharacterName(data.value)} fluid
+                               onChange={(event, data) => setPrimaryCharacterName(data.value)} fluid={true}
                                placeholder="Primary character's given name (first name)"/>
 
                         <Form.Group inline>
@@ -277,7 +277,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                         <Progress progress='value' value={designerPoints} total={400} success={designerPoints <= 400}
                                   error={designerPoints > 400}/>
 
-                        <Form.Field label='Age' control='input' type='number' min={16} max={100} fluid
+                        <Form.Field label='Age' control='input' type='number' min={16} max={100}
                                     onChange={(event, data) => setPrimaryCharacterAge(event.target.value)}
                                     value={primaryCharacterAge}/>
                         <Slider discrete value={primaryCharacterAge} settings={{
@@ -289,7 +289,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                         }}/>
 
 
-                        <div class="field" inline>
+                        <div className="field">
                             <label>Education</label>
 
                             <Form.Group inline>
@@ -321,7 +321,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                         }
 
 
-                        <div className="field" inline>
+                        <div className="field">
                             <label>Traits</label>
                             <Form.Group inline>
                                 {selectedTraits.length === 0 && 'None selected'}
@@ -365,6 +365,9 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                                 </Grid.Column>
                             </Grid.Row>
                         </Grid>
+
+
+                        {/*TODO: Married, sons, daughters*/}
 
                     </Form>
 
