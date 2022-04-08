@@ -191,7 +191,7 @@ public enum Trait {
 	// Education traits
 	Naive_Appeaser(Education, "education_diplomacy_1", List.of(new SkillModifier(Diplomacy, 2)), List.of("+10% diplomacy lifestyle experience"), 0),
 	Adequate_Bargainer(Education, "education_diplomacy_2", List.of(new SkillModifier(Diplomacy, 4)), List.of("+20% diplomacy lifestyle experience"), 20),
-	Charismatic_Negotiator(Education, "education_diplomacy_2", List.of(new SkillModifier(Diplomacy, 6)), List.of("+30% diplomacy lifestyle experience"), 40),
+	Charismatic_Negotiator(Education, "education_diplomacy_3", List.of(new SkillModifier(Diplomacy, 6)), List.of("+30% diplomacy lifestyle experience"), 40),
 	Grey_Eminence(Education, "education_diplomacy_4", List.of(new SkillModifier(Diplomacy, 8)), List.of("+40% diplomacy lifestyle experience"), 80),
 
 	Misguided_Warrior(Education, "education_martial_1", List.of(new SkillModifier(Martial, 2)), List.of("+10% martial lifestyle experience"), 0),
@@ -436,12 +436,6 @@ public enum Trait {
 			new SkillModifier(Learning, -2)
 	), """
 			""", -20),
-	Eunuch(Physical, "eunuch", List.of(), """
-			−20 Attraction opinion
-			 Can not have children
-			 Can not inherit titles
-			 May not marry
-			""", 7777),
 
 	// 	Lifestyle,
 	August(Lifestyle, "august", List.of(
@@ -464,7 +458,7 @@ public enum Trait {
 	), """
 			+20% Monthly prestige
 			 +20 Attraction opinion
-			""", 7777),
+			""", 50),
 	Overseer(Lifestyle, "overseer", List.of(
 			new SkillModifier(Martial, 2), new SkillModifier(Stewardship, 2)
 	), """
@@ -475,7 +469,7 @@ public enum Trait {
 	), """
 			+25% Enemy Fatal Casualties
 			 Crosses Rivers & Straits without Advantage loss
-			""", 7777),
+			""", 50),
 	Administrator(Lifestyle, "administrator", List.of(
 			new SkillModifier(Diplomacy, 1), new SkillModifier(Stewardship, 3)
 	), """
@@ -868,6 +862,7 @@ public enum Trait {
 
 		Strong.addExclusiveWith(Weak);
 		Shrewd.addExclusiveWith(Dull);
+		Giant.addExclusiveWith(Dwarf);
 
 		allExclusiveWithEachOther(List.of(Aspiring_Blademaster, Blademaster, Legendary_Blademaster));
 		allExclusiveWithEachOther(List.of(Novice_Hunter, Hunter, Master_Hunter));

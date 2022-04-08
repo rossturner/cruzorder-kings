@@ -1,9 +1,24 @@
-import {Link} from "react-router-dom";
 import {Slider} from "react-semantic-ui-range";
 import React, {useEffect, useState} from "react";
-import {Button, Checkbox, Container, Form, Grid, Header, Input, Loader, Message, Progress} from "semantic-ui-react";
+import {
+    Button, Card,
+    Checkbox,
+    Container,
+    Form,
+    Grid,
+    Header,
+    Icon, Image,
+    Input, List,
+    Loader,
+    Message,
+    Progress, Segment
+} from "semantic-ui-react";
 import cultureMapping from "./CultureMapping";
 import ageCostCalculator from "./AgeCostCalculator";
+import TraitButton, {buildTraitListItems} from "./TraitButton";
+import TraitStore from "./TraitStore";
+import skillCostCalculator from "./SkillCostCalculator";
+import SkillControl from "./SkillControl";
 
 const CharacterDesignerPage = ({loggedInPlayer}) => {
 
@@ -27,6 +42,79 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
     const [designerPoints, setDesignerPoints] = useState(0);
     const [primaryCharacterAge, setPrimaryCharacterAge] = useState(25);
 
+    const [educationTraitName, setEducationTraitName] = useState('education_diplomacy_1');
+    const educationTraits = TraitStore.getAll().filter(t => t.type === 'Education');
+    const educationTrait = TraitStore.getByInternalName(educationTraitName);
+    const [showEducations, setShowEducations] = useState(false);
+
+    const [selectedTraits, setSelectedTraits] = useState([]);
+    const [showMoreTraits, setShowMoreTraits] = useState(false);
+    let excludedTraits = [];
+    selectedTraits.forEach(selected => {
+        excludedTraits = excludedTraits.concat(TraitStore.getByInternalName(selected).exclusiveWith);
+    });
+    console.log('excludedTraits', excludedTraits);
+    const availableTraits = TraitStore.getAll().filter(t => t.type !== 'Education')
+        .filter(t => !selectedTraits.includes(t.internalName) && !excludedTraits.includes(t.internalName));
+    const availableTraitsByType = {};
+    availableTraits.forEach(t => {
+        if (!availableTraitsByType[t.type]) {
+            availableTraitsByType[t.type] = [];
+        }
+        availableTraitsByType[t.type].push(t);
+    });
+    const traitSections = [];
+    for (const [traitType, traits] of Object.entries(availableTraitsByType)) {
+        traitSections.push(<Segment>
+            <h4>{traitType}</h4>
+
+            {traits.map(t => <TraitButton key={t.internalName} internalName={t.internalName} onClick={() =>
+                setSelectedTraits(selectedTraits.concat([t.internalName]))
+            }/>)}
+        </Segment>);
+    }
+
+    const [baseSkills, setBaseSkills] = useState({
+        'Diplomacy': 0,
+        'Intrigue': 0,
+        'Martial': 0,
+        'Learning': 0,
+        'Stewardship': 0,
+        'Prowess': 0,
+    });
+
+    const [skills, setSkills] = useState({
+        'Diplomacy': 0,
+        'Intrigue': 0,
+        'Martial': 0,
+        'Learning': 0,
+        'Stewardship': 0,
+        'Prowess': 0,
+    });
+
+    useEffect(() => {
+        const calculated = Object.assign({}, baseSkills);
+
+        let characterTraits = [educationTrait];
+        selectedTraits.forEach(selected => characterTraits.push(TraitStore.getByInternalName(selected)));
+
+        Object.keys(calculated).forEach(skill => {
+            characterTraits.forEach(trait => {
+                trait.skillModifiers.forEach(modifier => {
+                    if (modifier.skill === skill) {
+                        calculated[skill] = calculated[skill] + modifier.modifierAmount;
+                    }
+                });
+            });
+        });
+
+        setSkills(calculated);
+    }, [baseSkills, educationTrait, selectedTraits]);
+
+
+    const maxChildren = Math.max(0, primaryCharacterAge - 15);
+    console.log('age, maxChildren', primaryCharacterAge, maxChildren);
+
     const cultureGroupOptions = Object.keys(cultureMapping).map(cultureGroup => {
         return {
             key: cultureGroup,
@@ -45,8 +133,12 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
     useEffect(() => {
         let pointsSpent = 0;
         pointsSpent += ageCostCalculator(primaryCharacterAge);
+        pointsSpent += educationTrait.cost;
+        selectedTraits.forEach(t => {
+            pointsSpent += TraitStore.getByInternalName(t).cost;
+        });
         setDesignerPoints(pointsSpent);
-    }, [primaryCharacterAge]);
+    }, [primaryCharacterAge, educationTraitName, selectedTraits]);
 
     const triggerSave = () => {
         // TODO check syntax of coat of arms
@@ -54,6 +146,25 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
 
     }
 
+    const addTo = (skill) => {
+        const cloned = Object.assign({}, baseSkills);
+        cloned[skill] = cloned[skill] + 1;
+        setBaseSkills(cloned);
+    }
+
+    const removeFrom = (skill) => {
+        const cloned = Object.assign({}, baseSkills);
+        cloned[skill] = cloned[skill] - 1;
+        setBaseSkills(cloned);
+    }
+
+    console.log('Martial', baseSkills['Martial'], skills['Martial'])
+
+    const buildSkillControl = (skill) => {
+        return <SkillControl skill={skill} baseValue={baseSkills[skill]} value={skills[skill]}
+            onAdd={() => addTo(skill)} onRemove={() => removeFrom(skill)}
+        />;
+    };
 
     return (
         <React.Fragment>
@@ -167,7 +278,8 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                                   error={designerPoints > 400}/>
 
                         <Form.Field label='Age' control='input' type='number' min={16} max={100} fluid
-                                    onChange={(event, data) => setPrimaryCharacterAge(event.target.value)} value={primaryCharacterAge} />
+                                    onChange={(event, data) => setPrimaryCharacterAge(event.target.value)}
+                                    value={primaryCharacterAge}/>
                         <Slider discrete value={primaryCharacterAge} settings={{
                             start: primaryCharacterAge,
                             min: 16,
@@ -176,6 +288,83 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                             onChange: setPrimaryCharacterAge
                         }}/>
 
+
+                        <div class="field" inline>
+                            <label>Education</label>
+
+                            <Form.Group inline>
+                                <TraitButton internalName={educationTraitName}/>
+                                <Button icon labelPosition='right' onClick={() => setShowEducations(!showEducations)}>
+                                    {educationTrait.name}
+                                    <Icon name='exchange'/>
+                                </Button>
+                            </Form.Group>
+
+                        </div>
+
+                        {showEducations &&
+                        <Card.Group>
+                            {educationTraits.map(trait =>
+                                <Card
+                                    className='education-card'
+                                    link
+                                    header={trait.name}
+                                    meta={trait.skillModifiers[0].skill + ' ' + trait.type}
+                                    description={<List>{buildTraitListItems(trait)}</List>}
+                                    onClick={() => {
+                                        setShowEducations(false);
+                                        setEducationTraitName(trait.internalName)
+                                    }}
+                                />
+                            )}
+                        </Card.Group>
+                        }
+
+
+                        <div className="field" inline>
+                            <label>Traits</label>
+                            <Form.Group inline>
+                                {selectedTraits.length === 0 && 'None selected'}
+                                {selectedTraits.map(selected => <TraitButton key={selected} internalName={selected}
+                                                                             onClick={() => setSelectedTraits(selectedTraits.filter(t => t !== selected))}
+                                />)}
+                            </Form.Group>
+
+                            <Button
+                                onClick={() => setShowMoreTraits(!showMoreTraits)}>{showMoreTraits ? 'Hide' : 'Add more traits'}</Button>
+
+                            {showMoreTraits && traitSections}
+                        </div>
+
+
+                        <h4>Skills</h4>
+
+                        <Grid columns='equal'>
+                            <Grid.Row>
+                                <Grid.Column>
+                                    {buildSkillControl('Diplomacy')}
+                                </Grid.Column>
+                                <Grid.Column>
+                                    {buildSkillControl('Intrigue')}
+                                </Grid.Column>
+                            </Grid.Row>
+                            <Grid.Row>
+                                <Grid.Column>
+                                    {buildSkillControl('Martial')}
+                                </Grid.Column>
+                                <Grid.Column>
+                                    {buildSkillControl('Learning')}
+                                </Grid.Column>
+                            </Grid.Row>
+                            <Grid.Row>
+                                <Grid.Column>
+                                    {buildSkillControl('Stewardship')}
+                                </Grid.Column>
+                                <Grid.Column>
+                                    {buildSkillControl('Prowess')}
+                                </Grid.Column>
+                            </Grid.Row>
+                        </Grid>
 
                     </Form>
 
@@ -186,7 +375,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                     </Message>
                     }
 
-                    <Button primary onClick={triggerSave}>Save</Button>
+                    {/*<Button primary onClick={triggerSave}>Save</Button>*/}
                 </React.Fragment>
                 }
             </Container>

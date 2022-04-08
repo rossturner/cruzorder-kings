@@ -3,3 +3,17 @@
     border-radius: 0;
     margin-bottom: 2em;
 }
+
+
+.ui.card.education-card {
+    width: 270px;
+}
+
+.ui.card>.content {
+    color: #444444;
+}
+
+.ui.image.trait:hover {
+    cursor: pointer;
+    background-color: cadetblue;
+}
