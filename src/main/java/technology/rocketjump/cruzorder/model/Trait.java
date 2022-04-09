@@ -215,15 +215,15 @@ public enum Trait {
 	Mastermind_Philosopher(Education, "education_learning_4", List.of(new SkillModifier(Learning, 8)), List.of("+40% learning lifestyle experience"), 80),
 
 	//	Congenital,
-	Melancholic(Congenital, "depressed", List.of(
+	Melancholic(Congenital, "depressed_genetic", List.of(
 			new SkillModifier(Diplomacy, -1), new SkillModifier(Martial, -1), new SkillModifier(Stewardship, -1), new SkillModifier(Intrigue, -1)
 	), List.of(
 			"−10% Fertility", "−0.5 Health", "Unique \"this is you\" description"
 	), -20),
-	Lunatic(Congenital, "lunatic", List.of(), List.of(
+	Lunatic(Congenital, "lunatic_genetic", List.of(), List.of(
 			"+10% Hostile Scheme Resistance", "+10 Same trait opinion", "−10 Attraction opinion", "−10 Vassal opinion", "−0.25 Health"
 	), -15),
-	Possessed(Congenital, "possessed", List.of(), List.of(
+	Possessed(Congenital, "possessed_genetic", List.of(), List.of(
 			"+10% Monthly Learning lifestyle Experience", "+15 Same trait opinion", "−10 Attraction opinion", "−0.5 Health"
 	), -20),
 	Fecund(Congenital, "fecund", List.of(), List.of(

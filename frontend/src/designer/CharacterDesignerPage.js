@@ -66,7 +66,10 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
     for (const [traitType, traits] of Object.entries(availableTraitsByType)) {
         traitSections.push(<Segment>
             <h4>{traitType}</h4>
-
+            {traitType === 'Congenital' && <p>Congenital traits might be passed down to your children.</p>}
+            {traitType === 'Infamous' &&
+            <p>Infamous traits are likely to be shunned or even a crime (giving your liege an excuse to imprison you and
+                revoke your titles) depending on religion.</p>}
             {traits.map(t => <TraitButton key={t.internalName} internalName={t.internalName} onClick={() =>
                 setSelectedTraits(selectedTraits.concat([t.internalName]))
             }/>)}
@@ -74,12 +77,12 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
     }
 
     const [baseSkills, setBaseSkills] = useState({
-        'Diplomacy': 0,
-        'Intrigue': 0,
-        'Martial': 0,
-        'Learning': 0,
-        'Stewardship': 0,
-        'Prowess': 0,
+        'Diplomacy': 5,
+        'Intrigue': 5,
+        'Martial': 5,
+        'Learning': 5,
+        'Stewardship': 5,
+        'Prowess': 5,
     });
 
     const [skills, setSkills] = useState({
@@ -89,6 +92,55 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
         'Learning': 0,
         'Stewardship': 0,
         'Prowess': 0,
+    });
+
+    const [married, setMarried] = useState(false);
+    const [spouseName, setSpouseName] = useState('');
+    const [numChildren, setNumChildren] = useState(0);
+    const [children, setChildren] = useState([]);
+    const [childAges, setChildAges] = useState('young');
+
+    const childControls = children.map((child, index) => {
+        const clone = Object.assign({}, child);
+
+        const updateChildrenState = () => {
+            const newChildren = [];
+            for (let cursor = 0; cursor < children.length; cursor++) {
+                if (cursor === index) {
+                    newChildren.push(clone);
+                } else {
+                    newChildren.push(children[cursor]);
+                }
+            }
+            setChildren(newChildren);
+        }
+
+        return <Segment key={index}>
+            <h4>Child {index + 1}</h4>
+
+            <Input label='Name' value={child.name}
+                   onChange={(event, data) => {
+                       clone.name = data.value;
+                       updateChildrenState();
+                   }} fluid={true}
+                   placeholder="Child's given name (first name)"/>
+
+            <Form.Group inline>
+                <label>Gender</label>
+                <Form.Radio
+                    label='Male'
+                    value='male'
+                    checked={child.gender === 'male'}
+                    onChange={() => {clone.gender = 'male'; updateChildrenState();}}
+                />
+                <Form.Radio
+                    label='Female'
+                    value='female'
+                    checked={child.gender === 'female'}
+                    onChange={() => { clone.gender = 'female'; updateChildrenState();}}
+                />
+            </Form.Group>
+        </Segment>
     });
 
     useEffect(() => {
@@ -111,8 +163,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
     }, [baseSkills, educationTrait, selectedTraits]);
 
 
-    const maxChildren = Math.max(0, primaryCharacterAge - 15);
-    console.log('age, maxChildren', primaryCharacterAge, maxChildren);
+    const maxChildren = Math.max(0, primaryCharacterAge - 16);
 
     const cultureGroupOptions = Object.keys(cultureMapping).map(cultureGroup => {
         return {
@@ -130,6 +181,20 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
     });
 
     useEffect(() => {
+        if (numChildren > maxChildren) {
+            setNumChildren(maxChildren);
+        }
+    }, [primaryCharacterAge]);
+    useEffect(() => {
+        while (numChildren > children.length) {
+            children.push({
+                name: '',
+                gender: 'male'
+            });
+        }
+    }, [numChildren]);
+
+    useEffect(() => {
         let pointsSpent = 0;
         pointsSpent += ageCostCalculator(primaryCharacterAge);
         pointsSpent += educationTrait.cost;
@@ -139,8 +204,9 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
         Object.values(baseSkills).forEach(skillValue => {
             pointsSpent += skillCostCalculator(skillValue);
         });
+        pointsSpent += (numChildren * 10);
         setDesignerPoints(pointsSpent);
-    }, [primaryCharacterAge, educationTraitName, selectedTraits, baseSkills]);
+    }, [primaryCharacterAge, educationTraitName, selectedTraits, baseSkills, numChildren]);
 
     const triggerSave = () => {
         // TODO check syntax of coat of arms
@@ -162,7 +228,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
 
     const buildSkillControl = (skill) => {
         return <SkillControl skill={skill} baseValue={baseSkills[skill]} value={skills[skill]}
-            onAdd={() => addTo(skill)} onRemove={() => removeFrom(skill)}
+                             onAdd={() => addTo(skill)} onRemove={() => removeFrom(skill)}
         />;
     };
 
@@ -205,7 +271,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                         <Form.Field
                             control={Checkbox}
                             checked={copyCoa}
-                            onChange={(event, data) => setCopyCoa(data.value)}
+                            onChange={(event, data) => setCopyCoa(data.checked)}
                             label={{children: 'Check this box to copy your dynasty coat of arms to your primary title i.e. your county or duchy coat of arms'}}
                         />
 
@@ -367,7 +433,49 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                         </Grid>
 
 
-                        {/*TODO: Married, sons, daughters*/}
+                        <Header as='h3'>Family</Header>
+
+                        <Form.Field
+                            control={Checkbox}
+                            checked={married}
+                            onChange={(event, data) => setMarried(data.checked)}
+                            label={{children: 'Check this box if you want to start the game married with a randomly generated spouse'}}
+                        />
+                        {married &&
+                        <Input label='Spouse name' value={spouseName}
+                               onChange={(event, data) => setSpouseName(data.value)} fluid={true}
+                               placeholder="Your spouse's given name (first name)"/>
+                        }
+                        <Form.Field label='Number of children' control='input' type='number' min={0} max={maxChildren}
+                                    onChange={(event, data) => setNumChildren(event.target.value)}
+                                    value={numChildren}/>
+                        <p><i>Each child costs 10 customisation points</i></p>
+
+                        {numChildren > 0 &&
+                        <Form.Group inline>
+                            <label>Age of children</label>
+                            <Form.Radio
+                                label='As young as possible'
+                                value='young'
+                                checked={childAges === 'young'}
+                                onChange={() => setChildAges('young')}
+                            />
+                            <Form.Radio
+                                label='Somewhere in the middle'
+                                value='middle'
+                                checked={childAges === 'middle'}
+                                onChange={() => setChildAges('middle')}
+                            />
+                            <Form.Radio
+                                label='As old as possible'
+                                value='old'
+                                checked={childAges === 'old'}
+                                onChange={() => setChildAges('old')}
+                            />
+                        </Form.Group>
+                        }
+
+                        {childControls}
 
                     </Form>
 
