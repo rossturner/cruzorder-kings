@@ -90,19 +90,6 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
     const [territoryOptions, setTerritoryOptions] = useState([]);
     const [selectedTerritory, setSelectedTerritory] = useState('');
 
-    useMemo(() => {
-        axios.get("/api/territory/available")
-            .then(response => {
-                let options = response.data;
-                if (loadedData.territoryId) {
-                    const selectedTerritory = TerritoryStore.getById(loadedData.territoryId);
-                    options.unshift(selectedTerritory);
-                }
-                setTerritoryOptions(options);
-            })
-            .finally(() => setLoading(false));
-    }, []);
-
     const [baseSkills, setBaseSkills] = useState({
         'Diplomacy': 5,
         'Intrigue': 5,
@@ -248,54 +235,64 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
     let loadedData = {};
 
     useMemo(() => {
-        if (editing) {
-            axios.get("/api/characters/"+editingId)
-                .then(response => {
-                    loadedData = response.data;
-                    console.log('response', loadedData);
-                    const territory = TerritoryStore.getById(loadedData.territoryId);
-                    setTerritoryOptions([territory].concat(territoryOptions));
-                    setSelectedTerritory(loadedData.territoryId);
 
-                    setDynastyNamePrefix(loadedData.character.dynastyPrefix);
-                    setDynastyName(loadedData.character.dynastyName);
-                    setDynastyMotto(loadedData.character.dynastyMotto);
-                    setDynastyCoa(loadedData.character.dynastyCoa);
-                    setCopyCoa(loadedData.character.copyCoaToTitle);
-                    setPrimaryCharacterName(loadedData.character.primaryCharacterName);
-                    setPrimaryCharacterGender(loadedData.character.isFemale ? 'female' : 'male');
-                    const orientation = loadedData.character.sexualOrientation;
-                    setSexualOrientation(orientation.charAt(0).toUpperCase() + orientation.slice(1));
-                    setCultureGroup(loadedData.character.cultureGroup);
-                    setCulture(loadedData.character.culture);
-                    setPrimaryCharacterDna(loadedData.character.primaryDna);
-                    setPrimaryCharacterAge(loadedData.character.primaryAge);
+        axios.get("/api/territory/available")
+            .then(response => {
+                const options = response.data;
+                setTerritoryOptions(options);
+                if (editing) {
+                    axios.get("/api/characters/"+editingId)
+                        .then(response => {
+                            loadedData = response.data;
+                            const territory = TerritoryStore.getById(loadedData.territoryId);
+                            options.unshift(territory);
+                            setTerritoryOptions(options);
+                            setSelectedTerritory(loadedData.territoryId);
 
-                    const educationTrait = loadedData.traits.find(t => t.includes('education'));
-                    setEducationTraitName(educationTrait);
-                    setSelectedTraits(loadedData.traits.filter(t => t !== educationTrait));
-                    setBaseSkills({
-                        'Diplomacy': loadedData.character.diplomacy,
-                        'Intrigue': loadedData.character.intrigue,
-                        'Martial': loadedData.character.martial,
-                        'Learning': loadedData.character.learning,
-                        'Stewardship': loadedData.character.stewardship,
-                        'Prowess': loadedData.character.prowess,
-                    });
-                    setMarried(loadedData.character.spouse);
-                    setSpouseName(loadedData.character.spouseName);
-                    setChildAges(loadedData.character.childrenAge.toLowerCase());
+                            setDynastyNamePrefix(loadedData.character.dynastyPrefix);
+                            setDynastyName(loadedData.character.dynastyName);
+                            setDynastyMotto(loadedData.character.dynastyMotto);
+                            setDynastyCoa(loadedData.character.dynastyCoa);
+                            setCopyCoa(loadedData.character.copyCoaToTitle);
+                            setPrimaryCharacterName(loadedData.character.primaryCharacterName);
+                            setPrimaryCharacterGender(loadedData.character.isFemale ? 'female' : 'male');
+                            const orientation = loadedData.character.sexualOrientation;
+                            setSexualOrientation(orientation.charAt(0).toUpperCase() + orientation.slice(1));
+                            setCultureGroup(loadedData.character.cultureGroup);
+                            setCulture(loadedData.character.culture);
+                            setPrimaryCharacterDna(loadedData.character.primaryDna);
+                            setPrimaryCharacterAge(loadedData.character.primaryAge);
 
-                    setNumChildren(loadedData.children.length);
-                    setChildren(loadedData.children.map(child => {
-                        return {
-                            name: child.name,
-                            isFemale: child.isFemale
-                        }
-                    }));
-                })
-                .catch(console.error);
-        }
+                            const educationTrait = loadedData.traits.find(t => t.includes('education'));
+                            setEducationTraitName(educationTrait);
+                            setSelectedTraits(loadedData.traits.filter(t => t !== educationTrait));
+                            setBaseSkills({
+                                'Diplomacy': loadedData.character.diplomacy,
+                                'Intrigue': loadedData.character.intrigue,
+                                'Martial': loadedData.character.martial,
+                                'Learning': loadedData.character.learning,
+                                'Stewardship': loadedData.character.stewardship,
+                                'Prowess': loadedData.character.prowess,
+                            });
+                            setMarried(loadedData.character.spouse);
+                            setSpouseName(loadedData.character.spouseName);
+                            setChildAges(loadedData.character.childrenAge.toLowerCase());
+
+                            setNumChildren(loadedData.children.length);
+                            setChildren(loadedData.children.map(child => {
+                                return {
+                                    name: child.name,
+                                    isFemale: child.isFemale
+                                }
+                            }));
+                        })
+                        .catch(console.error)
+                        .finally(() => setLoading(false));
+                } else {
+                    setLoading(false);
+                }
+            });
+
     }, []);
 
     const canSave = selectedTerritory &&
