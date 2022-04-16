@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import technology.rocketjump.cruzorder.model.Trait;
-import technology.rocketjump.cruzorder.model.TraitResponse;
+import technology.rocketjump.cruzorder.model.rest.TraitResponse;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,7 +17,6 @@ import java.util.stream.Stream;
 public class TraitsController {
 
 	private final DSLContext create;
-
 	@Autowired
 	public TraitsController(DSLContext create) {
 		this.create = create;

@@ -30,17 +30,12 @@ const TopLevelMenu = ({loggedInPlayer}) => {
             }
             {loggedInPlayer &&
                 <Menu.Item header>
-                    <Link to='/designer'>
-                        Character Designer
+                    <Link to='/characters'>
+                        {loggedInPlayer.isAdmin && 'All characters'}
+                        {!loggedInPlayer.isAdmin && loggedInPlayer.discordUsername+"'s Characters"}
                     </Link>
                 </Menu.Item>
             }
-
-            <Menu.Item header>
-                <Link to='/leaderboard'>
-                    Leaderboard
-                </Link>
-            </Menu.Item>
 
             {loggedInPlayer && loggedInPlayer.isAdmin &&
             <Menu.Item header>

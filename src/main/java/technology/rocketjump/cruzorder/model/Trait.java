@@ -1,9 +1,5 @@
 package technology.rocketjump.cruzorder.model;
 
-import org.h2.command.dml.Call;
-import org.springframework.data.repository.cdi.Eager;
-
-import javax.persistence.criteria.CriteriaBuilder;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -834,6 +830,7 @@ public enum Trait {
 	public final List<String> otherModifiers;
 	public final int cost;
 	public final Set<Trait> exclusiveWith = new LinkedHashSet<>();
+	public final static Map<String, Trait> byInternalName = new HashMap<>();
 
 	static {
 		Brave.addExclusiveWith(Craven);
@@ -869,6 +866,8 @@ public enum Trait {
 		allExclusiveWithEachOther(List.of(Wise_Man, Mystic, Miracle_Worker));
 		allExclusiveWithEachOther(List.of(Eager_Reveler, Famous_Reveler, Legendary_Reveler));
 		allExclusiveWithEachOther(List.of(Novice_Physician, Physician, Renowned_Physician));
+
+		Arrays.stream(Trait.values()).forEach(t -> byInternalName.put(t.internalName, t));
 	}
 
 	private static void allExclusiveWithEachOther(List<Trait> traits) {

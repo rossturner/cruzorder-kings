@@ -1,17 +1,20 @@
 import {Slider} from "react-semantic-ui-range";
 import React, {useEffect, useState} from "react";
 import {
-    Button, Card,
+    Button,
+    Card,
     Checkbox,
     Container,
     Form,
     Grid,
     Header,
-    Icon, Image,
-    Input, List,
+    Icon,
+    Input,
+    List,
     Loader,
     Message,
-    Progress, Segment
+    Progress,
+    Segment
 } from "semantic-ui-react";
 import cultureMapping from "./CultureMapping";
 import ageCostCalculator from "./AgeCostCalculator";
@@ -208,6 +211,12 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
         setDesignerPoints(pointsSpent);
     }, [primaryCharacterAge, educationTraitName, selectedTraits, baseSkills, numChildren]);
 
+    const canSave = dynastyName.length > 0 &&
+        primaryCharacterName.length > 0 &&
+        cultureGroup.length > 0 &&
+        culture.length > 0 &&
+        designerPoints <= 400;
+
     const triggerSave = () => {
         // TODO check syntax of coat of arms
         // check dynasty name is specified
@@ -237,7 +246,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
             <Container>
                 <Header as='h2'>Character Designer</Header>
 
-                <p>If you're not familiar with the CK3 ruler design, see <a
+                <p>If you're not familiar with the CK3 ruler designer, see <a
                     href="https://ck3.paradoxwikis.com/Ruler_Designer" target="_blank">here</a>.</p>
 
                 {loading &&
@@ -486,7 +495,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                     </Message>
                     }
 
-                    {/*<Button primary onClick={triggerSave}>Save</Button>*/}
+                    <Button primary onClick={triggerSave} disabled={!canSave}>Save</Button>
                 </React.Fragment>
                 }
             </Container>

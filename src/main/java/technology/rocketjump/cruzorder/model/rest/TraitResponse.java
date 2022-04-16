@@ -1,4 +1,7 @@
-package technology.rocketjump.cruzorder.model;
+package technology.rocketjump.cruzorder.model.rest;
+
+import technology.rocketjump.cruzorder.model.SkillModifier;
+import technology.rocketjump.cruzorder.model.Trait;
 
 import java.util.List;
 import java.util.Set;

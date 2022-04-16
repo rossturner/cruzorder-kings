@@ -9,6 +9,7 @@ import AdminPage from "./admin/AdminPage";
 import HomePage from "./HomePage";
 import CharacterDesignerPage from "./designer/CharacterDesignerPage";
 import TraitStore from "./designer/TraitStore";
+import CharacterListPage from "./designer/CharacterListPage";
 
 const App = ({history}) => {
 
@@ -67,7 +68,10 @@ const App = ({history}) => {
                 <Route exact path="/">
                     <HomePage />
                 </Route>
-                <Route exact path="/designer">
+                <Route exact path="/characters">
+                    <CharacterListPage loggedInPlayer={loggedInPlayer} />
+                </Route>
+                <Route path="/designer">
                     <CharacterDesignerPage loggedInPlayer={loggedInPlayer} />
                 </Route>
                 <Route path="/admin">
