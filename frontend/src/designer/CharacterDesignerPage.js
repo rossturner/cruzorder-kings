@@ -23,10 +23,13 @@ import TraitStore from "./TraitStore";
 import skillCostCalculator from "./SkillCostCalculator";
 import SkillControl from "./SkillControl";
 import axios from "axios";
-import {useHistory} from "react-router-dom";
+import {useHistory, useLocation} from "react-router-dom";
+import TerritoryStore from "./TerritoryStore";
 
 const CharacterDesignerPage = ({loggedInPlayer}) => {
     let history = useHistory();
+    const editingId = useLocation().pathname.substring(10);
+    const editing = editingId !== 'new';
 
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -90,7 +93,12 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
     useMemo(() => {
         axios.get("/api/territory/available")
             .then(response => {
-                setTerritoryOptions(response.data);
+                let options = response.data;
+                if (loadedData.territoryId) {
+                    const selectedTerritory = TerritoryStore.getById(loadedData.territoryId);
+                    options.unshift(selectedTerritory);
+                }
+                setTerritoryOptions(options);
             })
             .finally(() => setLoading(false));
     }, []);
@@ -184,11 +192,11 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
 
     const maxChildren = Math.max(0, primaryCharacterAge - 16);
 
-    const cultureGroupOptions = Object.keys(cultureMapping).map(cultureGroup => {
+    const cultureGroupOptions = Object.keys(cultureMapping).map(cg => {
         return {
-            key: cultureGroup,
-            text: cultureGroup,
-            value: cultureGroup
+            key: cg,
+            text: cg,
+            value: cg
         }
     });
     let cultureOptions = cultureGroup === '' ? [] : cultureMapping[cultureGroup].map(culture => {
@@ -237,6 +245,59 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
         setDesignerPoints(pointsSpent);
     }, [primaryCharacterAge, educationTraitName, selectedTraits, baseSkills, numChildren]);
 
+    let loadedData = {};
+
+    useMemo(() => {
+        if (editing) {
+            axios.get("/api/characters/"+editingId)
+                .then(response => {
+                    loadedData = response.data;
+                    console.log('response', loadedData);
+                    const territory = TerritoryStore.getById(loadedData.territoryId);
+                    setTerritoryOptions([territory].concat(territoryOptions));
+                    setSelectedTerritory(loadedData.territoryId);
+
+                    setDynastyNamePrefix(loadedData.character.dynastyPrefix);
+                    setDynastyName(loadedData.character.dynastyName);
+                    setDynastyMotto(loadedData.character.dynastyMotto);
+                    setDynastyCoa(loadedData.character.dynastyCoa);
+                    setCopyCoa(loadedData.character.copyCoaToTitle);
+                    setPrimaryCharacterName(loadedData.character.primaryCharacterName);
+                    setPrimaryCharacterGender(loadedData.character.isFemale ? 'female' : 'male');
+                    const orientation = loadedData.character.sexualOrientation;
+                    setSexualOrientation(orientation.charAt(0).toUpperCase() + orientation.slice(1));
+                    setCultureGroup(loadedData.character.cultureGroup);
+                    setCulture(loadedData.character.culture);
+                    setPrimaryCharacterDna(loadedData.character.primaryDna);
+                    setPrimaryCharacterAge(loadedData.character.primaryAge);
+
+                    const educationTrait = loadedData.traits.find(t => t.includes('education'));
+                    setEducationTraitName(educationTrait);
+                    setSelectedTraits(loadedData.traits.filter(t => t !== educationTrait));
+                    setBaseSkills({
+                        'Diplomacy': loadedData.character.diplomacy,
+                        'Intrigue': loadedData.character.intrigue,
+                        'Martial': loadedData.character.martial,
+                        'Learning': loadedData.character.learning,
+                        'Stewardship': loadedData.character.stewardship,
+                        'Prowess': loadedData.character.prowess,
+                    });
+                    setMarried(loadedData.character.spouse);
+                    setSpouseName(loadedData.character.spouseName);
+                    setChildAges(loadedData.character.childrenAge.toLowerCase());
+
+                    setNumChildren(loadedData.children.length);
+                    setChildren(loadedData.children.map(child => {
+                        return {
+                            name: child.name,
+                            isFemale: child.isFemale
+                        }
+                    }));
+                })
+                .catch(console.error);
+        }
+    }, []);
+
     const canSave = selectedTerritory &&
         dynastyName.length > 0 &&
         primaryCharacterName.length > 0 &&
@@ -253,7 +314,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
             dynastyName,
             dynastyMotto,
             dynastyCoa,
-            copyCoaToTile: copyCoa,
+            copyCoaToTitle: copyCoa,
             primaryCharacterName,
             isFemale: primaryCharacterGender === 'female',
             sexualOrientation: sexualOrientation.toLowerCase(),

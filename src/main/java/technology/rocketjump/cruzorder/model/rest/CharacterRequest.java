@@ -69,7 +69,7 @@ public class CharacterRequest {
 		this.dynastyCoa = dynastyCoa;
 	}
 
-	public boolean isCopyCoaToTitle() {
+	public boolean getCopyCoaToTitle() {
 		return copyCoaToTitle;
 	}
 
@@ -85,11 +85,11 @@ public class CharacterRequest {
 		this.primaryCharacterName = primaryCharacterName;
 	}
 
-	public boolean isFemale() {
+	public boolean getIsFemale() {
 		return isFemale;
 	}
 
-	public void setFemale(boolean female) {
+	public void setIsFemale(boolean female) {
 		isFemale = female;
 	}
 

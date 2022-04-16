@@ -5,12 +5,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import technology.rocketjump.cruzorder.codegen.tables.pojos.Character;
+import technology.rocketjump.cruzorder.codegen.tables.pojos.CharacterChild;
 import technology.rocketjump.cruzorder.codegen.tables.pojos.Player;
 import technology.rocketjump.cruzorder.model.rest.CharacterRequest;
 import technology.rocketjump.cruzorder.model.rest.DecoratedCharacter;
 import technology.rocketjump.cruzorder.players.PlayerService;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,8 +33,12 @@ public class CharacterService {
 		return characterRepo.getCharacterByDynastyName(dynastyName);
 	}
 
+	public Optional<Character> getByDynastyId(String dynastyId) {
+		return characterRepo.getCharacterByDynastyId(Integer.parseInt(dynastyId));
+	}
+
 	public void createNew(Player player, CharacterRequest characterRequest) {
-		BigDecimal dynastyId = characterRepo.nextDynastyIdentifier();
+		int dynastyId = characterRepo.nextDynastyIdentifier();
 
 		territoryRepo.assignDynasty(dynastyId, characterRequest.getTerritoryId());
 		characterRepo.createCharacter(dynastyId, player, characterRequest);
@@ -48,7 +52,7 @@ public class CharacterService {
 		}
 	}
 
-	public void updateExisting(BigDecimal dynastyId, Player player, CharacterRequest characterRequest) {
+	public void updateExisting(int dynastyId, Player player, CharacterRequest characterRequest) {
 		Optional<Character> existing = characterRepo.getCharacterByDynastyId(dynastyId);
 		if (existing.isEmpty() || !existing.get().getPlayerId().equals(player.getPlayerId())) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN);
@@ -85,5 +89,13 @@ public class CharacterService {
 			decorated.setPlayer(player.get());
 		}
 		return decorated;
+	}
+
+	public List<CharacterChild> getChildren(int dynastyId) {
+		return characterRepo.getChildren(dynastyId);
+	}
+
+	public List<String> getTraits(Integer dynastyId) {
+		return characterRepo.getTraits(dynastyId);
 	}
 }

@@ -13,6 +13,7 @@ import technology.rocketjump.cruzorder.codegen.tables.pojos.Character;
 import technology.rocketjump.cruzorder.codegen.tables.pojos.Player;
 import technology.rocketjump.cruzorder.model.Trait;
 import technology.rocketjump.cruzorder.model.rest.CharacterRequest;
+import technology.rocketjump.cruzorder.model.rest.CharacterWithChildren;
 import technology.rocketjump.cruzorder.model.rest.DecoratedCharacter;
 import technology.rocketjump.cruzorder.players.PlayerService;
 
@@ -48,6 +49,33 @@ public class CharactersController {
 				return characterService.getAllCharacters();
 			} else {
 				return characterService.getAllCharactersForPlayer(player);
+			}
+		}
+	}
+
+	@GetMapping("/{dynastyId}")
+	public CharacterWithChildren getCharacter(@RequestHeader("Authorization") String jwToken,
+											  @PathVariable String dynastyId) {
+		if (jwToken == null) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+		} else {
+			PlayerLoginToken token = jwtService.parse(jwToken);
+			Player player = playerService.getPlayer(token);
+
+			Optional<Character> byDynastyId = characterService.getByDynastyId(dynastyId);
+			if (byDynastyId.isEmpty()) {
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+			} else {
+				if (player.getIsAdmin() || byDynastyId.get().getPlayerId().equals(player.getPlayerId())) {
+					CharacterWithChildren response = new CharacterWithChildren();
+					response.setCharacter(byDynastyId.get());
+					response.setChildren(characterService.getChildren(byDynastyId.get().getBaseId()));
+					response.setTraits(characterService.getTraits(byDynastyId.get().getBaseId()));
+					response.setTerritoryId(territoryRepo.getTerritoryForDynasty(byDynastyId.get().getBaseId()).getTerritoryId());
+					return response;
+				} else {
+					throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+				}
 			}
 		}
 	}

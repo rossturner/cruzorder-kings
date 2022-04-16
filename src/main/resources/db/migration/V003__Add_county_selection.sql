@@ -1,6 +1,6 @@
 create table territory_selection (
-    territory_id        numeric primary key,
-    dynasty_id          numeric,
+    territory_id        integer primary key,
+    dynasty_id          integer,
     display_name        varchar(200),
     title_list          varchar(300),
     admin_only          boolean

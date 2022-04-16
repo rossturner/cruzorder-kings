@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import technology.rocketjump.cruzorder.codegen.tables.pojos.TerritorySelection;
 import technology.rocketjump.cruzorder.codegen.tables.records.TerritorySelectionRecord;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,7 +25,7 @@ public class TerritoryRepo {
 
 	public boolean isAvailable(int territoryId) {
 		Optional<TerritorySelection> territorySelection = create.selectFrom(TERRITORY_SELECTION)
-				.where(TERRITORY_SELECTION.TERRITORY_ID.eq(BigDecimal.valueOf(territoryId)))
+				.where(TERRITORY_SELECTION.TERRITORY_ID.eq(territoryId))
 				.fetchOptionalInto(TerritorySelection.class);
 
 		return territorySelection.isPresent() && territorySelection.get().getDynastyId() == null;
@@ -48,21 +47,21 @@ public class TerritoryRepo {
 				.fetchInto(TerritorySelection.class);
 	}
 
-	public void assignDynasty(BigDecimal dynastyId, int territoryId) {
+	public void assignDynasty(int dynastyId, int territoryId) {
 		create.update(TERRITORY_SELECTION)
 				.set(TERRITORY_SELECTION.DYNASTY_ID, dynastyId)
-				.where(TERRITORY_SELECTION.TERRITORY_ID.eq(BigDecimal.valueOf(territoryId)))
+				.where(TERRITORY_SELECTION.TERRITORY_ID.eq(territoryId))
 				.execute();
 	}
 
 	public void removeDynasty(int territoryId) {
 		create.update(TERRITORY_SELECTION)
-				.set(TERRITORY_SELECTION.DYNASTY_ID, (BigDecimal)null)
-				.where(TERRITORY_SELECTION.TERRITORY_ID.eq(BigDecimal.valueOf(territoryId)))
+				.set(TERRITORY_SELECTION.DYNASTY_ID, (Integer)null)
+				.where(TERRITORY_SELECTION.TERRITORY_ID.eq(territoryId))
 				.execute();
 	}
 
-	public TerritorySelection getTerritoryForDynasty(BigDecimal dynastyId) {
+	public TerritorySelection getTerritoryForDynasty(int dynastyId) {
 		return create.selectFrom(TERRITORY_SELECTION)
 				.where(TERRITORY_SELECTION.DYNASTY_ID.eq(dynastyId))
 				.fetchOneInto(TerritorySelection.class);

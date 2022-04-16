@@ -13,11 +13,11 @@ public class ChildRequest {
 		this.name = name;
 	}
 
-	public boolean isFemale() {
+	public boolean getIsFemale() {
 		return isFemale;
 	}
 
-	public void setFemale(boolean female) {
+	public void setIsFemale(boolean female) {
 		isFemale = female;
 	}
 }
