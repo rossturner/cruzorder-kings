@@ -7,6 +7,8 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CharacterRequest {
 
+	private int territoryId;
+
 	private String dynastyPrefix;
 	private String dynastyName;
 	private String dynastyMotto;
@@ -31,6 +33,7 @@ public class CharacterRequest {
 	private int baseProwess;
 
 	private boolean hasSpouse;
+	private String spouseName;
 	private ChildAgeSetting childrenAge;
 	private List<ChildRequest> children;
 
@@ -208,5 +211,21 @@ public class CharacterRequest {
 
 	public void setChildren(List<ChildRequest> children) {
 		this.children = children;
+	}
+
+	public int getTerritoryId() {
+		return territoryId;
+	}
+
+	public void setTerritoryId(int territoryId) {
+		this.territoryId = territoryId;
+	}
+
+	public String getSpouseName() {
+		return spouseName;
+	}
+
+	public void setSpouseName(String spouseName) {
+		this.spouseName = spouseName;
 	}
 }

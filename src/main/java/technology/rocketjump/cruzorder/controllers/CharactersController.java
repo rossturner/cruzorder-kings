@@ -8,10 +8,12 @@ import org.springframework.web.server.ResponseStatusException;
 import technology.rocketjump.cruzorder.auth.JwtService;
 import technology.rocketjump.cruzorder.auth.PlayerLoginToken;
 import technology.rocketjump.cruzorder.characters.CharacterService;
+import technology.rocketjump.cruzorder.characters.TerritoryRepo;
 import technology.rocketjump.cruzorder.codegen.tables.pojos.Character;
 import technology.rocketjump.cruzorder.codegen.tables.pojos.Player;
 import technology.rocketjump.cruzorder.model.Trait;
 import technology.rocketjump.cruzorder.model.rest.CharacterRequest;
+import technology.rocketjump.cruzorder.model.rest.DecoratedCharacter;
 import technology.rocketjump.cruzorder.players.PlayerService;
 
 import java.util.List;
@@ -24,16 +26,18 @@ public class CharactersController {
 	private final JwtService jwtService;
 	private final PlayerService playerService;
 	private final CharacterService characterService;
+	private final TerritoryRepo territoryRepo;
 
 	@Autowired
-	public CharactersController(JwtService jwtService, PlayerService playerService, CharacterService characterService) {
+	public CharactersController(JwtService jwtService, PlayerService playerService, CharacterService characterService, TerritoryRepo territoryRepo) {
 		this.jwtService = jwtService;
 		this.playerService = playerService;
 		this.characterService = characterService;
+		this.territoryRepo = territoryRepo;
 	}
 
 	@GetMapping
-	public List<Character> getAllCharacters(@RequestHeader("Authorization") String jwToken) {
+	public List<DecoratedCharacter> getAllCharacters(@RequestHeader("Authorization") String jwToken) {
 		if (jwToken == null) {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 		} else {
@@ -57,6 +61,10 @@ public class CharactersController {
 		} else {
 			PlayerLoginToken token = jwtService.parse(jwToken);
 			Player player = playerService.getPlayer(token);
+
+			if (!territoryRepo.isAvailable(characterRequest.getTerritoryId())) {
+				throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED);
+			}
 
 			Optional<Character> existing = characterService.getByDynastyName(characterRequest.getDynastyName().trim());
 

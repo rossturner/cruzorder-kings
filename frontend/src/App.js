@@ -10,6 +10,7 @@ import HomePage from "./HomePage";
 import CharacterDesignerPage from "./designer/CharacterDesignerPage";
 import TraitStore from "./designer/TraitStore";
 import CharacterListPage from "./designer/CharacterListPage";
+import TerritoryStore from "./designer/TerritoryStore";
 
 const App = ({history}) => {
 
@@ -38,16 +39,26 @@ const App = ({history}) => {
         }
 
 
-        axios.get("/api/traits")
-            .then((response) => {
-                if (!TraitStore.initialised) {
-                    TraitStore.addTraits(response.data);
-                    setLoading(false);
-                }
-            })
-            .catch((error) => {
-                console.error('Error loading traits', error);
-            });
+        Promise.all([
+            axios.get("/api/traits")
+                .then((response) => {
+                    if (!TraitStore.initialised) {
+                        TraitStore.addTraits(response.data);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error loading traits', error);
+                }),
+            axios.get("/api/territory")
+                .then((response) => {
+                    if (!TerritoryStore.initialised) {
+                        TerritoryStore.add(response.data);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error loading territory', error);
+                })
+        ]).then(() => setLoading(false));
 
     }, []);
 

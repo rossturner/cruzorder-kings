@@ -38,7 +38,7 @@ public class CharacterRepo {
 	}
 
 	public BigDecimal nextDynastyIdentifier() {
-		Optional<Record1<BigDecimal>> optional = create.select(CHARACTER.BASE_ID).orderBy(CHARACTER.BASE_ID.desc()).fetchOptional();
+		Optional<Record1<BigDecimal>> optional = create.select(CHARACTER.BASE_ID).from(CHARACTER).orderBy(CHARACTER.BASE_ID.desc()).fetchOptional();
 		if (optional.isPresent()) {
 			return optional.get().component1().add(ONE_HUNDRED);
 		} else {

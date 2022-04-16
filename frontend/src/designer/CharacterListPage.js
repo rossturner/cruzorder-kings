@@ -45,9 +45,11 @@ const CharacterListPage = ({loggedInPlayer}) => {
                         <Table celled>
                             <Table.Header>
                                 <Table.Row>
-                                    <Table.HeaderCell>User</Table.HeaderCell>
-                                    <Table.HeaderCell>Action</Table.HeaderCell>
-                                    <Table.HeaderCell>Date Time</Table.HeaderCell>
+                                    <Table.HeaderCell>Player</Table.HeaderCell>
+                                    <Table.HeaderCell>Character Name</Table.HeaderCell>
+                                    <Table.HeaderCell>Dynasty Name</Table.HeaderCell>
+                                    <Table.HeaderCell>Territory</Table.HeaderCell>
+                                    <Table.HeaderCell>Edit</Table.HeaderCell>
                                 </Table.Row>
                             </Table.Header>
 

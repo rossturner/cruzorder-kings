@@ -22,6 +22,7 @@ create table character (
     prowess             integer,
 
     spouse              boolean,
+    spouse_name         varchar(100),
     children_age        varchar(100)
 
 );

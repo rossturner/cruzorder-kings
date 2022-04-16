@@ -17,3 +17,7 @@
     cursor: pointer;
     background-color: cadetblue;
 }
+
+.ui.selection.dropdown {
+    min-height: unset;
+}

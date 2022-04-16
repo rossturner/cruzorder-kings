@@ -1,5 +1,5 @@
 import {Slider} from "react-semantic-ui-range";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {
     Button,
     Card,
@@ -22,10 +22,14 @@ import TraitButton, {buildTraitListItems} from "./TraitButton";
 import TraitStore from "./TraitStore";
 import skillCostCalculator from "./SkillCostCalculator";
 import SkillControl from "./SkillControl";
+import axios from "axios";
+import {useHistory} from "react-router-dom";
 
 const CharacterDesignerPage = ({loggedInPlayer}) => {
+    let history = useHistory();
 
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
     const [errorText, setErrorText] = useState(false);
 
     const [dynastyNamePrefix, setDynastyNamePrefix] = useState('');
@@ -38,9 +42,9 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
     const [primaryCharacterGender, setPrimaryCharacterGender] = useState('male');
     const [sexualOrientation, setSexualOrientation] = useState('Heterosexual');
 
-    const [cultureGroup, setCultureGroup] = useState('');
-    const [culture, setCulture] = useState('');
-    const [primaryCharacterDNA, setPrimaryCharacterDNA] = useState('');
+    const [cultureGroup, setCultureGroup] = useState('North Germanic');
+    const [culture, setCulture] = useState('Norse');
+    const [primaryCharacterDna, setPrimaryCharacterDna] = useState('');
 
     const [designerPoints, setDesignerPoints] = useState(0);
     const [primaryCharacterAge, setPrimaryCharacterAge] = useState(25);
@@ -78,6 +82,18 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
             }/>)}
         </Segment>);
     }
+
+    // TODO add in selected territory as first option when editing
+    const [territoryOptions, setTerritoryOptions] = useState([]);
+    const [selectedTerritory, setSelectedTerritory] = useState('');
+
+    useMemo(() => {
+        axios.get("/api/territory/available")
+            .then(response => {
+                setTerritoryOptions(response.data);
+            })
+            .finally(() => setLoading(false));
+    }, []);
 
     const [baseSkills, setBaseSkills] = useState({
         'Diplomacy': 5,
@@ -133,14 +149,14 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                 <Form.Radio
                     label='Male'
                     value='male'
-                    checked={child.gender === 'male'}
-                    onChange={() => {clone.gender = 'male'; updateChildrenState();}}
+                    checked={child.isFemale === false}
+                    onChange={() => {clone.isFemale = false; updateChildrenState();}}
                 />
                 <Form.Radio
                     label='Female'
                     value='female'
-                    checked={child.gender === 'female'}
-                    onChange={() => { clone.gender = 'female'; updateChildrenState();}}
+                    checked={child.isFemale === true}
+                    onChange={() => { clone.isFemale = true; updateChildrenState();}}
                 />
             </Form.Group>
         </Segment>
@@ -182,6 +198,13 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
             value: culture
         }
     });
+    let territoryOptionItems = territoryOptions.map(t => {
+        return {
+            key: t.territoryId,
+            text: t.displayName,
+            value: t.territoryId,
+        }
+    });
 
     useEffect(() => {
         if (numChildren > maxChildren) {
@@ -192,8 +215,11 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
         while (numChildren > children.length) {
             children.push({
                 name: '',
-                gender: 'male'
+                isFemale: false
             });
+        }
+        while (children.length > numChildren) {
+            children.pop();
         }
     }, [numChildren]);
 
@@ -211,15 +237,59 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
         setDesignerPoints(pointsSpent);
     }, [primaryCharacterAge, educationTraitName, selectedTraits, baseSkills, numChildren]);
 
-    const canSave = dynastyName.length > 0 &&
+    const canSave = selectedTerritory &&
+        dynastyName.length > 0 &&
         primaryCharacterName.length > 0 &&
         cultureGroup.length > 0 &&
         culture.length > 0 &&
         designerPoints <= 400;
 
     const triggerSave = () => {
-        // TODO check syntax of coat of arms
-        // check dynasty name is specified
+        setErrorText('');
+        setSaving(true);
+        const payload = {
+            territoryId: selectedTerritory,
+            dynastyPrefix: dynastyNamePrefix,
+            dynastyName,
+            dynastyMotto,
+            dynastyCoa,
+            copyCoaToTile: copyCoa,
+            primaryCharacterName,
+            isFemale: primaryCharacterGender === 'female',
+            sexualOrientation: sexualOrientation.toLowerCase(),
+            cultureGroup,
+            culture,
+            primaryCharacterDna,
+            primaryCharacterAge,
+            traits: [educationTrait.internalName].concat(selectedTraits),
+            baseDiplomacy: baseSkills.Diplomacy,
+            baseIntrigue: baseSkills.Intrigue,
+            baseMartial: baseSkills.Martial,
+            baseLearning: baseSkills.Learning,
+            baseStewardship: baseSkills.Stewardship,
+            baseProwess: baseSkills.Prowess,
+            hasSpouse: married,
+            spouseName,
+            childrenAge: childAges.toUpperCase(),
+            children
+        };
+
+        axios.post("/api/characters", payload)
+            .then(() => {
+                history.push("/characters");
+            })
+            .catch(error => {
+                if (error.response.status === 412) {
+                    setErrorText('The selected territory has now been reserved by another player, please make another selection.');
+                } else if (error.response.status === 409) {
+                    setErrorText('There is another dynasty with the same name, please change the dynasty name.');
+                } else if (error.response.status === 406) {
+                    setErrorText('Too many customisation points spent.');
+                } else {
+                    setErrorText('An unknown error has occured');
+                }
+                setSaving(false);
+            });
 
     }
 
@@ -255,14 +325,29 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
 
                 {!loading &&
                 <React.Fragment>
-                    <Header as='h3'>Dynasty</Header>
-
                     <Form>
+                        <Header as='h3'>Territory</Header>
+                        <p>For the next game of Crusader Kings, all players are starting as Norse chiefdoms of the Ásatrú faith in Scandinavia in 863.
+                            Each starting territory is a parcel of 2 counties.</p>
+                        <p>You can <a href={process.env.PUBLIC_URL + '/images/scandi_counties.png'} target='_blank'>
+                            click here to see which counties are where
+                        </a>.</p>
+
+                        <Form.Select
+                            label='Starting territory*'
+                            value={selectedTerritory}
+                            onChange={(event, data) => setSelectedTerritory(data.value)}
+                            options={territoryOptionItems}
+                        />
+
+
+                        <Header as='h3'>Dynasty</Header>
+
                         <Input label='Dynasty name prefix' value={dynastyNamePrefix}
                                onChange={(event, data) => setDynastyNamePrefix(data.value)} fluid={true}
                                placeholder='(Optional) Use this to add a prefix to your dynasty name e.g. "von" or "de"'/>
 
-                        <Input label='Dynasty name' value={dynastyName}
+                        <Input label='Dynasty name*' value={dynastyName}
                                onChange={(event, data) => setDynastyName(data.value)} fluid={true}
                                placeholder='The name of your dynasty (family name)'/>
 
@@ -271,7 +356,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                                placeholder='(Optional) Your dynasty motto'/>
 
                         <Form.Field label='Dynasty Coat of Arms (use Copy to Clipboard in CK3 CoA designer)'
-                                    value={dynastyCoa} onChange={(data) => setDynastyCoa(data.value)}
+                                    value={dynastyCoa} onChange={(event) => setDynastyCoa(event.target.value)}
                                     control='textarea' rows='3'/>
                         <p>Need some inspiration for a Coat of Arms or just want to take someone's custom work? Try
                             visiting <a target='_blank' href='https://www.reddit.com/r/CKHeraldry/'>r/CKHeraldry</a>
@@ -287,7 +372,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
 
                         <Header as='h3'>Primary Character</Header>
 
-                        <Input label='Character name' value={primaryCharacterName}
+                        <Input label='Character name*' value={primaryCharacterName}
                                onChange={(event, data) => setPrimaryCharacterName(data.value)} fluid={true}
                                placeholder="Primary character's given name (first name)"/>
 
@@ -327,8 +412,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                             options={cultureGroupOptions}
                         />
 
-                        <p>If you're not sure which culture group/culture to pick, ask in Discord and we'll find the
-                            culture of your initial holdings.</p>
+                        <p>It is strongly recommended to keep this as North Germanic/Norse.</p>
 
                         <Form.Select
                             label='Culture'
@@ -338,7 +422,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                         />
 
                         <Form.Field label='Character DNA (use Copy DNA in CK3 ruler designer)'
-                                    value={primaryCharacterDNA} onChange={(data) => setPrimaryCharacterDNA(data.value)}
+                                    value={primaryCharacterDna} onChange={(event) => setPrimaryCharacterDna(event.target.value)}
                                     control='textarea' rows='3'/>
                         <p>You can leave this blank for a random appearance based on your culture, or try visiting <a
                             target='_blank' href='https://www.reddit.com/r/CKTinder/'>r/CKTinder</a>
@@ -471,9 +555,9 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                             />
                             <Form.Radio
                                 label='Somewhere in the middle'
-                                value='middle'
-                                checked={childAges === 'middle'}
-                                onChange={() => setChildAges('middle')}
+                                value='medium'
+                                checked={childAges === 'medium'}
+                                onChange={() => setChildAges('medium')}
                             />
                             <Form.Radio
                                 label='As old as possible'
@@ -495,7 +579,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                     </Message>
                     }
 
-                    <Button primary onClick={triggerSave} disabled={!canSave}>Save</Button>
+                    <Button primary onClick={triggerSave} disabled={saving || !canSave}>Save</Button>
                 </React.Fragment>
                 }
             </Container>
