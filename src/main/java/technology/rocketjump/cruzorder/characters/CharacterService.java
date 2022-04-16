@@ -8,6 +8,7 @@ import technology.rocketjump.cruzorder.codegen.tables.pojos.Character;
 import technology.rocketjump.cruzorder.codegen.tables.pojos.Player;
 import technology.rocketjump.cruzorder.model.rest.CharacterRequest;
 import technology.rocketjump.cruzorder.model.rest.DecoratedCharacter;
+import technology.rocketjump.cruzorder.players.PlayerService;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -19,11 +20,13 @@ public class CharacterService {
 
 	private final CharacterRepo characterRepo;
 	private final TerritoryRepo territoryRepo;
+	private final PlayerService playerService;
 
 	@Autowired
-	public CharacterService(CharacterRepo characterRepo, TerritoryRepo territoryRepo) {
+	public CharacterService(CharacterRepo characterRepo, TerritoryRepo territoryRepo, PlayerService playerService) {
 		this.characterRepo = characterRepo;
 		this.territoryRepo = territoryRepo;
+		this.playerService = playerService;
 	}
 
 	public Optional<Character> getByDynastyName(String dynastyName) {
@@ -76,6 +79,11 @@ public class CharacterService {
 		DecoratedCharacter decorated = new DecoratedCharacter();
 		decorated.setCharacter(character);
 		decorated.setTerritory(territoryRepo.getTerritoryForDynasty(character.getBaseId()));
+
+		Optional<Player> player = playerService.getPlayerById(character.getPlayerId());
+		if (player.isPresent()) {
+			decorated.setPlayer(player.get());
+		}
 		return decorated;
 	}
 }

@@ -2,6 +2,7 @@ import {Button, Container, Header, Placeholder, Table} from "semantic-ui-react";
 import React, {useEffect, useState} from "react";
 import axios from "axios";
 import {Link} from "react-router-dom";
+import PlayerAvatar from "../player/PlayerAvatar";
 
 
 const CharacterListPage = ({loggedInPlayer}) => {
@@ -20,6 +21,21 @@ const CharacterListPage = ({loggedInPlayer}) => {
                 console.error('Error retrieving characters', error);
             })
     }, []);
+
+    let bodyRows = [];
+
+    characters.forEach(data => {
+        bodyRows.push(<Table.Row>
+            <Table.Cell>
+                <PlayerAvatar player={data.player} size='mini'/>
+                {data.player.discordUsername}
+            </Table.Cell>
+            <Table.Cell>{data.character.primaryCharacterName}</Table.Cell>
+            <Table.Cell>{data.character.dynastyName}</Table.Cell>
+            <Table.Cell>{data.territory.displayName}</Table.Cell>
+            <Table.Cell><Button as={Link} to={'/designer/'+data.character.baseId}>Edit</Button></Table.Cell>
+        </Table.Row>);
+    });
 
     return (
         <React.Fragment>
@@ -49,12 +65,12 @@ const CharacterListPage = ({loggedInPlayer}) => {
                                     <Table.HeaderCell>Character Name</Table.HeaderCell>
                                     <Table.HeaderCell>Dynasty Name</Table.HeaderCell>
                                     <Table.HeaderCell>Territory</Table.HeaderCell>
-                                    <Table.HeaderCell>Edit</Table.HeaderCell>
+                                    <Table.HeaderCell></Table.HeaderCell>
                                 </Table.Row>
                             </Table.Header>
 
                             <Table.Body>
-
+                                {bodyRows}
                             </Table.Body>
                         </Table>
                     }

@@ -9,7 +9,7 @@ create table character (
 
     primary_character_name  varchar(100),
     is_female           boolean,
-    sexual_orientation  varchar(10),
+    sexual_orientation  varchar(20),
     culture_group       varchar(100),
     culture             varchar(100),
     primary_dna         text,
