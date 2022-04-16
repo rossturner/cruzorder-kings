@@ -11,6 +11,8 @@ const CharacterListPage = ({loggedInPlayer}) => {
     const [characters, setCharacters] = useState([]);
     // let history = useHistory();
 
+    const canCreateCharacters = characters.length <= 0 || loggedInPlayer.isAdmin;
+
     useEffect(() => {
         axios.get('/api/characters')
             .then((response) => {
@@ -77,7 +79,7 @@ const CharacterListPage = ({loggedInPlayer}) => {
 
                     {characters.length === 0 && <p>You have not yet created any characters.</p>}
 
-                    <Button as={Link} to={'/designer/new'} primary>Create new</Button>
+                    {canCreateCharacters && <Button as={Link} to={'/designer/new'} primary>Create new</Button>}
                 </React.Fragment>
                 }
             </Container>
