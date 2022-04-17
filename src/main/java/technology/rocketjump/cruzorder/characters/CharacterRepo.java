@@ -57,6 +57,7 @@ public class CharacterRepo {
 		character.setSexualOrientation(characterRequest.getSexualOrientation());
 		character.setCultureGroup(characterRequest.getCultureGroup());
 		character.setCulture(characterRequest.getCulture());
+		character.setReligion(characterRequest.getReligion());
 		character.setPrimaryDna(characterRequest.getPrimaryCharacterDna().trim());
 		character.setPrimaryAge(characterRequest.getPrimaryCharacterAge());
 		character.setDiplomacy(characterRequest.getBaseDiplomacy());
@@ -83,6 +84,7 @@ public class CharacterRepo {
 				.set(CHARACTER.SEXUAL_ORIENTATION, characterRequest.getSexualOrientation())
 				.set(CHARACTER.CULTURE_GROUP, characterRequest.getCultureGroup())
 				.set(CHARACTER.CULTURE, characterRequest.getCulture())
+				.set(CHARACTER.RELIGION, characterRequest.getReligion())
 				.set(CHARACTER.PRIMARY_DNA, characterRequest.getPrimaryCharacterDna().trim())
 				.set(CHARACTER.PRIMARY_AGE, characterRequest.getPrimaryCharacterAge())
 				.set(CHARACTER.DIPLOMACY, characterRequest.getBaseDiplomacy())

@@ -46,6 +46,7 @@ const CharacterListPage = ({loggedInPlayer}) => {
                     {loggedInPlayer.isAdmin && 'All characters'}
                     {!loggedInPlayer.isAdmin && loggedInPlayer.discordUsername+"'s Characters"}
                 </Header>
+                {loggedInPlayer.isAdmin && <p>Note that non-admins can only see and edit their own character(s).</p>}
                 {loading &&
                     <Placeholder>
                         <Placeholder.Line />

@@ -1,0 +1,1 @@
+alter table character add column religion varchar(100) default 'norse_pagan';

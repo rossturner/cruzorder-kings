@@ -20,6 +20,7 @@ public class CharacterRequest {
 	private SexualOrientation sexualOrientation;
 	private String cultureGroup;
 	private String culture;
+	private String religion;
 	private String primaryCharacterDna;
 
 	private int primaryCharacterAge;
@@ -227,5 +228,13 @@ public class CharacterRequest {
 
 	public void setSpouseName(String spouseName) {
 		this.spouseName = spouseName;
+	}
+
+	public String getReligion() {
+		return religion;
+	}
+
+	public void setReligion(String religion) {
+		this.religion = religion;
 	}
 }

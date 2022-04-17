@@ -25,6 +25,7 @@ import SkillControl from "./SkillControl";
 import axios from "axios";
 import {useHistory, useLocation} from "react-router-dom";
 import TerritoryStore from "./TerritoryStore";
+import religionMapping from "./ReligionMapping";
 
 function toLowerCase(value) {
     return value ? value.toLowerCase() : value;
@@ -51,6 +52,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
 
     const [cultureGroup, setCultureGroup] = useState('North Germanic');
     const [culture, setCulture] = useState('Norse');
+    const [religion, setReligion] = useState('norse_pagan');
     const [primaryCharacterDna, setPrimaryCharacterDna] = useState('');
 
     const [designerPoints, setDesignerPoints] = useState(0);
@@ -203,6 +205,13 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
             value: t.territoryId,
         }
     });
+    const religionOptions = Object.keys(religionMapping).map(religionId => {
+        return {
+            key: religionId,
+            text: religionMapping[religionId],
+            value: religionId
+        }
+    });
 
     useEffect(() => {
         if (numChildren > maxChildren) {
@@ -262,6 +271,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                             setSexualOrientation(orientation.charAt(0).toUpperCase() + orientation.slice(1));
                             setCultureGroup(loadedData.character.cultureGroup);
                             setCulture(loadedData.character.culture);
+                            setReligion(loadedData.character.religion);
                             setPrimaryCharacterDna(loadedData.character.primaryDna);
                             setPrimaryCharacterAge(loadedData.character.primaryAge);
 
@@ -319,6 +329,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
             sexualOrientation: sexualOrientation.toLowerCase(),
             cultureGroup,
             culture,
+            religion,
             primaryCharacterDna,
             primaryCharacterAge,
             traits: [educationTrait.internalName].concat(selectedTraits),
@@ -485,6 +496,20 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                             onChange={(event, data) => setCulture(data.value)}
                             options={cultureOptions}
                         />
+
+                        <p>Your religion is currently set to {religionMapping[religion]}. Contact an admin if you'd like to change this.</p>
+
+                        {loggedInPlayer.isAdmin &&
+                            <Segment inverted color='teal'>
+                                <p>Only admins can see this religion selection</p>
+                                <Form.Select
+                                    label='Religion'
+                                    value={religion}
+                                    onChange={(event, data) => setReligion(data.value)}
+                                    options={religionOptions}
+                                />
+                            </Segment>
+                        }
 
                         <Form.Field label='Character DNA (use Copy DNA in CK3 ruler designer)'
                                     value={primaryCharacterDna} onChange={(event) => setPrimaryCharacterDna(event.target.value)}
