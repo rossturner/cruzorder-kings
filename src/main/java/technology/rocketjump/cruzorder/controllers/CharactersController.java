@@ -107,7 +107,7 @@ public class CharactersController {
 		}
 	}
 
-	@PostMapping("/{dynastyId}")
+	@PutMapping("/{dynastyId}")
 	@Transactional
 	public void updateExistingCharacter(@RequestHeader("Authorization") String jwToken,
 										@RequestBody CharacterRequest characterRequest,
@@ -128,6 +128,9 @@ public class CharactersController {
 			);
 			boolean sameCreator = existing.get().getPlayerId().equals(player.getPlayerId());
 			if (!sameCreator && !player.getIsAdmin()) {
+				System.out.println(String.format("Returning 403 as statement is %b, !sameCreator is %b and !player.getIsAdmin() is %b",
+						(!sameCreator && !player.getIsAdmin()), !sameCreator, !player.getIsAdmin()
+				));
 				throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 			}
 			if (totalCustomisationPoints(characterRequest) > 400) {
