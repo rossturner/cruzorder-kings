@@ -107,6 +107,33 @@ public class CharactersController {
 		}
 	}
 
+	@PutMapping("/{dynastyId}")
+	@Transactional
+	public void updateExistingCharacter(@RequestHeader("Authorization") String jwToken,
+										@RequestBody CharacterRequest characterRequest,
+										@PathVariable String dynastyId) {
+		if (jwToken == null) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+		} else {
+			PlayerLoginToken token = jwtService.parse(jwToken);
+			Player player = playerService.getPlayer(token);
+
+			Optional<Character> existing = characterService.getByDynastyName(characterRequest.getDynastyName().trim());
+
+			if (existing.isEmpty()) {
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+			}
+			if (!existing.get().getPlayerId().equals(player.getPlayerId()) || !player.getIsAdmin()) {
+				throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+			}
+			if (totalCustomisationPoints(characterRequest) > 400) {
+				throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE);
+			}
+
+			characterService.updateExisting(existing.get().getBaseId(), player, characterRequest);
+		}
+	}
+
 	private int totalCustomisationPoints(CharacterRequest characterRequest) {
 		int customisationPoints = characterRequest.getTraits().stream()
 				.map(t -> Trait.byInternalName.get(t).cost)

@@ -27,7 +27,7 @@ const CharacterListPage = ({loggedInPlayer}) => {
     let bodyRows = [];
 
     characters.forEach(data => {
-        bodyRows.push(<Table.Row>
+        bodyRows.push(<Table.Row key={data.character.baseId}>
             <Table.Cell>
                 <PlayerAvatar player={data.player} size='mini'/>
                 {data.player.discordUsername}

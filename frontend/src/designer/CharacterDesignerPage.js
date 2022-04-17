@@ -26,6 +26,10 @@ import axios from "axios";
 import {useHistory, useLocation} from "react-router-dom";
 import TerritoryStore from "./TerritoryStore";
 
+function toLowerCase(value) {
+    return value ? value.toLowerCase() : value;
+}
+
 const CharacterDesignerPage = ({loggedInPlayer}) => {
     let history = useHistory();
     const editingId = useLocation().pathname.substring(10);
@@ -86,7 +90,6 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
         </Segment>);
     }
 
-    // TODO add in selected territory as first option when editing
     const [territoryOptions, setTerritoryOptions] = useState([]);
     const [selectedTerritory, setSelectedTerritory] = useState('');
 
@@ -205,7 +208,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
         if (numChildren > maxChildren) {
             setNumChildren(maxChildren);
         }
-    }, [primaryCharacterAge]);
+    }, [numChildren, maxChildren]);
     useEffect(() => {
         while (numChildren > children.length) {
             children.push({
@@ -216,7 +219,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
         while (children.length > numChildren) {
             children.pop();
         }
-    }, [numChildren]);
+    }, [numChildren, children]);
 
     useEffect(() => {
         let pointsSpent = 0;
@@ -230,9 +233,8 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
         });
         pointsSpent += (numChildren * 10);
         setDesignerPoints(pointsSpent);
-    }, [primaryCharacterAge, educationTraitName, selectedTraits, baseSkills, numChildren]);
+    }, [primaryCharacterAge, educationTraitName, selectedTraits, baseSkills, numChildren, educationTrait]);
 
-    let loadedData = {};
 
     useMemo(() => {
 
@@ -243,7 +245,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                 if (editing) {
                     axios.get("/api/characters/"+editingId)
                         .then(response => {
-                            loadedData = response.data;
+                            const loadedData = response.data;
                             const territory = TerritoryStore.getById(loadedData.territoryId);
                             options.unshift(territory);
                             setTerritoryOptions(options);
@@ -276,7 +278,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                             });
                             setMarried(loadedData.character.spouse);
                             setSpouseName(loadedData.character.spouseName);
-                            setChildAges(loadedData.character.childrenAge.toLowerCase());
+                            setChildAges(toLowerCase(loadedData.character.childrenAge));
 
                             setNumChildren(loadedData.children.length);
                             setChildren(loadedData.children.map(child => {
@@ -293,7 +295,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                 }
             });
 
-    }, []);
+    }, [editing, editingId]);
 
     const canSave = selectedTerritory &&
         dynastyName.length > 0 &&
@@ -332,8 +334,13 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
             children
         };
 
-        axios.post("/api/characters", payload)
-            .then(() => {
+        let request = undefined;
+        if (editing) {
+            request = axios.put("/api/characters/"+editingId, payload);
+        } else {
+            request = axios.post("/api/characters", payload);
+        }
+        request.then(() => {
                 history.push("/characters");
             })
             .catch(error => {
@@ -375,7 +382,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                 <Header as='h2'>Character Designer</Header>
 
                 <p>If you're not familiar with the CK3 ruler designer, see <a
-                    href="https://ck3.paradoxwikis.com/Ruler_Designer" target="_blank">here</a>.</p>
+                    href="https://ck3.paradoxwikis.com/Ruler_Designer" target="_blank" rel="noreferrer">here</a>.</p>
 
                 {loading &&
                 <Loader/>
@@ -387,7 +394,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                         <Header as='h3'>Territory</Header>
                         <p>For the next game of Crusader Kings, all players are starting as Norse chiefdoms of the Ásatrú faith in Scandinavia in 863.
                             Each starting territory is a parcel of 2 counties.</p>
-                        <p>You can <a href={process.env.PUBLIC_URL + '/images/scandi_counties.png'} target='_blank'>
+                        <p>You can <a href={process.env.PUBLIC_URL + '/images/scandi_counties.png'} target='_blank' rel='noreferrer'>
                             click here to see which counties are where
                         </a>.</p>
 
@@ -417,7 +424,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                                     value={dynastyCoa} onChange={(event) => setDynastyCoa(event.target.value)}
                                     control='textarea' rows='3'/>
                         <p>Need some inspiration for a Coat of Arms or just want to take someone's custom work? Try
-                            visiting <a target='_blank' href='https://www.reddit.com/r/CKHeraldry/'>r/CKHeraldry</a>
+                            visiting <a target='_blank' rel='noreferrer' href='https://www.reddit.com/r/CKHeraldry/'>r/CKHeraldry</a>
                         </p>
 
                         <Form.Field
@@ -483,7 +490,7 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
                                     value={primaryCharacterDna} onChange={(event) => setPrimaryCharacterDna(event.target.value)}
                                     control='textarea' rows='3'/>
                         <p>You can leave this blank for a random appearance based on your culture, or try visiting <a
-                            target='_blank' href='https://www.reddit.com/r/CKTinder/'>r/CKTinder</a>
+                            target='_blank' rel='noreferrer' href='https://www.reddit.com/r/CKTinder/'>r/CKTinder</a>
                         </p>
 
                         <Header as='h3'>Character Customisation</Header>
