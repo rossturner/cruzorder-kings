@@ -1,9 +1,7 @@
 package technology.rocketjump.cruzorder.characters;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import technology.rocketjump.cruzorder.codegen.tables.pojos.Character;
 import technology.rocketjump.cruzorder.codegen.tables.pojos.CharacterChild;
 import technology.rocketjump.cruzorder.codegen.tables.pojos.Player;
@@ -53,11 +51,6 @@ public class CharacterService {
 	}
 
 	public void updateExisting(int dynastyId, Player player, CharacterRequest characterRequest) {
-		Optional<Character> existing = characterRepo.getCharacterByDynastyId(dynastyId);
-		if (existing.isEmpty() || !existing.get().getPlayerId().equals(player.getPlayerId())) {
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-		}
-
 		characterRepo.updateCharacter(dynastyId, player, characterRequest);
 
 		characterRepo.deleteTraits(dynastyId);

@@ -123,14 +123,8 @@ public class CharactersController {
 			if (existing.isEmpty()) {
 				throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 			}
-			System.out.println(String.format("Player ID %s is updating character %s who has player ID %s and is an admin %b",
-					player.getPlayerId(), existing.get().getBaseId(), existing.get().getPlayerId(), player.getIsAdmin())
-			);
 			boolean sameCreator = existing.get().getPlayerId().equals(player.getPlayerId());
 			if (!sameCreator && !player.getIsAdmin()) {
-				System.out.println(String.format("Returning 403 as statement is %b, !sameCreator is %b and !player.getIsAdmin() is %b",
-						(!sameCreator && !player.getIsAdmin()), !sameCreator, !player.getIsAdmin()
-				));
 				throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 			}
 			if (totalCustomisationPoints(characterRequest) > 400) {
