@@ -11,6 +11,7 @@ import technology.rocketjump.cruzorder.characters.CharacterService;
 import technology.rocketjump.cruzorder.characters.TerritoryRepo;
 import technology.rocketjump.cruzorder.codegen.tables.pojos.Character;
 import technology.rocketjump.cruzorder.codegen.tables.pojos.Player;
+import technology.rocketjump.cruzorder.codegen.tables.pojos.TerritorySelection;
 import technology.rocketjump.cruzorder.model.Trait;
 import technology.rocketjump.cruzorder.model.rest.CharacterRequest;
 import technology.rocketjump.cruzorder.model.rest.CharacterWithChildren;
@@ -129,6 +130,17 @@ public class CharactersController {
 			}
 			if (totalCustomisationPoints(characterRequest) > 400) {
 				throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE);
+			}
+
+			TerritorySelection currentTerritory = territoryRepo.getTerritoryForDynasty(Integer.parseInt(dynastyId));
+			int newTerritoryId = characterRequest.getTerritoryId();
+			if (currentTerritory.getTerritoryId() != newTerritoryId) {
+				if (!territoryRepo.isAvailable(newTerritoryId)) {
+					throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED);
+				} else {
+					territoryRepo.removeDynasty(currentTerritory.getTerritoryId());
+					territoryRepo.assignDynasty(Integer.parseInt(dynastyId), newTerritoryId);
+				}
 			}
 
 			characterService.updateExisting(existing.get().getBaseId(), player, characterRequest);
