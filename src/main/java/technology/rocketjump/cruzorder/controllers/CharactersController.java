@@ -118,7 +118,7 @@ public class CharactersController {
 			PlayerLoginToken token = jwtService.parse(jwToken);
 			Player player = playerService.getPlayer(token);
 
-			Optional<Character> existing = characterService.getByDynastyName(characterRequest.getDynastyName().trim());
+			Optional<Character> existing = characterService.getByDynastyId(dynastyId);
 
 			if (existing.isEmpty()) {
 				throw new ResponseStatusException(HttpStatus.NOT_FOUND);
