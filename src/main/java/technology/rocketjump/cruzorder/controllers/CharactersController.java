@@ -123,7 +123,8 @@ public class CharactersController {
 			if (existing.isEmpty()) {
 				throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 			}
-			if (!(existing.get().getPlayerId().equals(player.getPlayerId()) || player.getIsAdmin())) {
+			boolean sameCreator = existing.get().getPlayerId().equals(player.getPlayerId());
+			if (!sameCreator && !player.getIsAdmin()) {
 				throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 			}
 			if (totalCustomisationPoints(characterRequest) > 400) {
