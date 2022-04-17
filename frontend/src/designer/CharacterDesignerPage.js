@@ -345,13 +345,9 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
             children
         };
 
-        let request = undefined;
-        if (editing) {
-            request = axios.put("/api/characters/"+editingId, payload);
-        } else {
-            request = axios.post("/api/characters", payload);
-        }
-        request.then(() => {
+        const requestUrl = editing ? "/api/characters/"+editingId : "/api/characters";
+        axios.post(requestUrl, payload)
+            .then(() => {
                 history.push("/characters");
             })
             .catch(error => {

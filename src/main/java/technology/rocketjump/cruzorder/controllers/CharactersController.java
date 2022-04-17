@@ -107,7 +107,7 @@ public class CharactersController {
 		}
 	}
 
-	@PutMapping("/{dynastyId}")
+	@PostMapping("/{dynastyId}")
 	@Transactional
 	public void updateExistingCharacter(@RequestHeader("Authorization") String jwToken,
 										@RequestBody CharacterRequest characterRequest,
