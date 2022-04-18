@@ -237,8 +237,8 @@ const CharacterDesignerPage = ({loggedInPlayer}) => {
         selectedTraits.forEach(t => {
             pointsSpent += TraitStore.getByInternalName(t).cost;
         });
-        Object.values(baseSkills).forEach(skillValue => {
-            pointsSpent += skillCostCalculator(skillValue);
+        Object.keys(baseSkills).forEach(skillName => {
+            pointsSpent += skillCostCalculator(baseSkills[skillName], skillName);
         });
         pointsSpent += (numChildren * 10);
         setDesignerPoints(pointsSpent);

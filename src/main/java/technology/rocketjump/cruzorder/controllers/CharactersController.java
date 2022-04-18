@@ -152,28 +152,28 @@ public class CharactersController {
 				.map(t -> Trait.byInternalName.get(t).cost)
 				.reduce(0, Integer::sum);
 		customisationPoints += (characterRequest.getChildren().size() * 10);
-		customisationPoints += skillCostCalculator(characterRequest.getBaseDiplomacy());
-		customisationPoints += skillCostCalculator(characterRequest.getBaseStewardship());
-		customisationPoints += skillCostCalculator(characterRequest.getBaseIntrigue());
-		customisationPoints += skillCostCalculator(characterRequest.getBaseLearning());
-		customisationPoints += skillCostCalculator(characterRequest.getBaseMartial());
-		customisationPoints += skillCostCalculator(characterRequest.getBaseProwess());
+		customisationPoints += skillCostCalculator(characterRequest.getBaseDiplomacy(), "Diplomacy");
+		customisationPoints += skillCostCalculator(characterRequest.getBaseStewardship(), "Stewardship");
+		customisationPoints += skillCostCalculator(characterRequest.getBaseIntrigue(), "Intrigue");
+		customisationPoints += skillCostCalculator(characterRequest.getBaseLearning(), "Learning");
+		customisationPoints += skillCostCalculator(characterRequest.getBaseMartial(), "Martial");
+		customisationPoints += skillCostCalculator(characterRequest.getBaseProwess(), "Prowess");
 		return customisationPoints;
 	}
 
-	private int skillCostCalculator(int skill) {
+	private int skillCostCalculator(int skill, String skillName) {
 		int cost = 0;
 		for (int cursor = 1; cursor <= skill; cursor++) {
 			if (cursor <= 4) {
-				cost += 2;
+				cost += skillName.equals("Prowess") ? 1 : 2;
 			} else if (cursor <= 8) {
-				cost += 4;
+				cost += skillName.equals("Prowess") ? 2 : 4;
 			} else if (cursor <= 12) {
-				cost += 7;
+				cost += skillName.equals("Prowess") ? 4 : 7;
 			} else if (cursor <= 16) {
-				cost += 11;
+				cost += skillName.equals("Prowess") ? 7 : 11;
 			} else {
-				cost += 17;
+				cost += skillName.equals("Prowess") ? 11 : 17;
 			}
 		}
 		return cost;
