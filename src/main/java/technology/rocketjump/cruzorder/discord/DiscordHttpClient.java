@@ -12,6 +12,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.util.stream.Collectors;
+
 @Component
 public class DiscordHttpClient {
 
@@ -50,6 +52,10 @@ public class DiscordHttpClient {
 		if (response.getStatusCode().is2xxSuccessful()) {
 			return objectMapper.readValue(response.getBody(), DiscordAccessToken.class);
 		} else {
+			System.err.println("Received " + response.getStatusCode() + " from Discord " + getTokenUrl);
+			System.err.println("Headers were: " + response.getHeaders().entrySet().stream()
+					.map(e -> e.getKey() + ": " + String.join(", ", e.getValue()))
+					.collect(Collectors.joining("\n")));
 			throw new ResponseStatusException(response.getStatusCode(), response.getBody());
 		}
 	}
